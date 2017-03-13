@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\pgApi;
 
+use App\Events\Repairman;
 use App\Http\Controllers\Controller;
 use App\Repositories\RepairmanApiRepository;
+use GeoJson\Geometry\GeometryCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Phaza\LaravelPostgis\Geometries\Point;
 
 class PgsqlApiController extends Controller
 {
+
     /**
      * Create a new controller instance.
      *
@@ -43,12 +47,28 @@ class PgsqlApiController extends Controller
      */
     public function searchGeom(Request $request)
     {
+
+
+        $geom=new Point(37.422009, -122.084047);
+
+
+        dd($geom);
+
+        $location1 = new Repairman();
+        $location1->name = '小明';
+        $location1->address = '北京市海淀区银谷大厦';
+        $location1->geom = '';
+        $location1->save();
+
+
+//        dd($gis);
+
         //1.距离范围，2.地理位置
         $options = $request->all();
         Log::info('c=PgsqlApiController f=searchGeom  options='.json_encode($options));
         $geom = isset($options['geom']) ? $options['geom'] : '';
         $status = isset($options['status']) ? $options['status'] : 0;
-        $distance   = isset($options['distance']) ? (int)$options['distance'] : env('DISTANCE',10000);
+        $dist   = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE',10000);
         $limit   = isset($options['limit'])  ? (int)$options['limit'] : env('LIMIT',10);
 
         if(empty($geom)) {

@@ -82,6 +82,9 @@ $app->singleton(
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
  $app->register(Illuminate\Redis\RedisServiceProvider::class);
+ $app->register(Bosnadev\Database\DatabaseServiceProvider::class);
+ $app->register(Phaza\LaravelPostgis\DatabaseServiceProvider::class);
+
 
 /*
 |--------------------------------------------------------------------------
