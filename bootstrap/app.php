@@ -81,7 +81,11 @@ $app->singleton(
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
+
+//使用redis,需要注册服务
  $app->register(Illuminate\Redis\RedisServiceProvider::class);
+
+// 要使用postGis包，需要注册两个服务
  $app->register(Bosnadev\Database\DatabaseServiceProvider::class);
  $app->register(Phaza\LaravelPostgis\DatabaseServiceProvider::class);
 
