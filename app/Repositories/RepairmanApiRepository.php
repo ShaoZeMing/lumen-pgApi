@@ -3,7 +3,8 @@
 namespace App\Repositories;
 
 use App\Events\Repairman;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RepairmanApiRepository extends BaseRepository
 {
@@ -19,158 +20,165 @@ class RepairmanApiRepository extends BaseRepository
     }
 
 
-    public function getSqlData(){
-        $results = app('db')->select(
-            "select  id,
-            name,
-            mobile,
-            status,
-            address,
-            uid,
-            geom,
-            created_at,
-            updated_at,
+    /**
+     * 搜索师傅.
+     *
+     * @param string $filePath
+     * @param bool   $immutable
+     * @param string   $point 经纬度
+     * @param int   $dist 距离范围
+     * @param int   $limit 查询多少个
+     * @param int   $status 师傅状态
+     *
+     * @return bool
+     */
+
+    public  function selectData($point,$dist,$status,$limit){
+
+        $sql=$this->getSearchSql($point,$dist,$status,$limit);
+        try{
+            $result= DB::select($sql);
+        }catch (\Exception $e){
+            Log::info('c=RepairmanApiRepository f=selectData  options='.$e->getMessage());
+        }
+        return $result;
+    }
+
+
+    /**
+     * 添加师傅.
+     *
+     * @param string $filePath
+     * @param array   $data  添加数据
+     *
+     * @return bool
+     */
+
+    public  function insertData($data)
+    {
+        $sql=$this->getInsertSql($data);
+
+        try{
+            $result= DB::insert($sql);
+        }catch (\Exception $e){
+            Log::info('c=RepairmanApiRepository f=insertData  options='.$e->getMessage());
+        }
+        return $result;
+
+    }
+    /**
+     * 修改师傅.
+     *
+     * @param string $filePath
+     * @param array   $data  修改数据
+     *
+     * @return bool
+     */
+
+    public  function saveData($data,$id)
+    {
+        $sql=$this->getSaveSql($data,$id);
+//        echo $sql;
+        try{
+            $result= DB::update($sql);
+        }catch (\Exception $e){
+            Log::info('c=RepairmanApiRepository f=saveData  options='.$e->getMessage());
+        }
+        return $result;
+
+    }
+
+
+
+
+
+
+    /**
+     * 拼装插入数据GIS sql语句.
+     *
+     * @param string $filePath
+     * @param array   $data 要插入的字段/数据
+     *
+     * @return string  sql
+     */
+
+    protected function getSearchSql($point,$dist,$status,$limit){
+
+        $point="point($point)";
+        $distSql="ST_DistanceSphere(geom,ST_GeomFromText('$point',4326))";
+
+        $sql = "select *,
             ST_AsText(geom),
-            ST_DistanceSphere(geom,ST_GeomFromText('point(116.340714 39.992727)',4326)) dist
+            {$distSql} dist
             from repairmans
-            where name is not null
-            and  ST_DistanceSphere(geom,ST_GeomFromText('point(116.340714 39.992727)',4326)) < 1000
-            order by ST_DistanceSphere(geom,ST_GeomFromText('point(116.340714 39.992727)',4326))
-            limit 10"
-        );
+            where {$distSql} < {$dist}
+            AND status = {$status}
+            order by {$distSql}
+            limit {$limit}";
 
-        return $results;
+        return $sql;
+
     }
 
 
-    public function getResultByWhere($where, $offset = 0, $limit = 10, $devId = '', $userId = 0)
-    {
 
-        $repairman = $this->makeModel()->newQuery()->select(
-            'id',
-            'name',
-            'mobile',
-            'status',
-            'address',
-            'uid',
-            'geom',
-            'created_at',
-            'updated_at'
-        )
-            ->where($where)
-            ->limit($limit)
-            ->offset($offset)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->toArray();
-//        if($repairman) {
-//            foreach($repairman as $key => &$video) {
-//                $video['is_favourite'] = $this->checkFavourite($video['id'], $devId, $userId);
-//            }
-//        }
-        return $repairman;
-    }
+    /**
+     * 拼装插入数据GIS sql语句.
+     *
+     * @param string $filePath
+     * @param array   $data 要插入的字段/数据
+     *
+     * @return string  sql
+     */
 
-    public function getIndexVideos($where)
-    {
-        return $this->makeModel()->newQuery()->select('id',
-            'name',
-            'desc',
-            'img_url',
-            'video_url',
-            'see_num',
-            'act_flag as status',
-            'created_at',
-            'sort_num'
-        )
-            ->where($where)
-            ->orderby('sort_num', 'desc')
-            ->orderBy('id', 'desc')
-            ->get()
-            ->toArray();
-    }
-
-    public function addSeeTimes($videoId)
-    {
-        $video = $this->makeModel()->newQuery()->select(
-            'id',
-            'see_num',
-            'act_flag as status')
-            ->find($videoId);
-        if ($video) {
-            $video->see_num += 1;
-            return $video->save();
-        }
-        return $video;
-    }
-
-    public function getVideoById($videoId, $devId = '', $userId = 0)
-    {
-        $video = $this->makeModel()->newQuery()->select(
-            'id',
-            'name',
-            'lesson_id',
-            'desc',
-            'img_url',
-            'video_url',
-            'see_num',
-            'act_flag as status',
-            'created_at'
-        )
-            ->find($videoId);
-        if ($video) {
-            if ($userId) {
-                $video['is_favourite'] = $this->checkFavourite($video->id, $devId, $userId);
-            } else {
-                $video['is_favourite'] = 0;
+    protected function getInsertSql($data){
+        $strfield = '';
+        $strvalue = '';
+        foreach ($data as $k=>$v) {
+            $strfield .=  $k  . ',';
+            if($k=='geom'){
+                $strvalue .= "ST_GeomFromText('POINT({$v})',4326),";
+            }else{
+                $strvalue .= "'". addslashes($v) ."',";
             }
         }
-        return $video;
+        $strfield=rtrim($strfield, ',');
+        $strvalue=rtrim($strvalue, ',');
+
+        return "insert into repairmans({$strfield},created_at,updated_at) VALUES ($strvalue,now(),now())";
+
     }
 
-    public function checkFavourite($id, $devId = '', $userId = 0)
-    {
-        if (!$userId) {
-            return 0;
-        }
-        $colWhere = [
-            'video_id' => $id,
-            'uid' => $userId,
-        ];
-        return $this->userCollectionApiRepository->getCountByWhere($colWhere);
-    }
 
-    public function getVideoInfoById($videoId, $devId = '', $userId = 0)
-    {
-        $video = $this->makeModel()->newQuery()->select(
-            'id',
-            'name',
-            'lesson_id',
-            'desc',
-            'img_url',
-            'see_num',
-            'act_flag as status',
-            'created_at'
-        )
-            ->find($videoId);
-        if ($video) {
-            if ($userId) {
-                $video['is_favourite'] = $this->checkFavourite($video->id, $devId, $userId);
-            } else {
-                $video['is_favourite'] = 0;
+
+
+    /**
+     * 拼装修改师傅数据GIS sql语句.
+     *
+     * @param string $filePath
+     * @param array   $data 要插入的字段/数据
+     * @param array   $uid  修改关联uid键
+     *
+     * @return string  sql
+     */
+
+    protected function getSaveSql($data,$uid){
+        $set='';
+        foreach ($data as $k=>$v) {
+            if($k=='geom'){
+                $strvalue = "ST_GeomFromText('POINT({$v})',4326)";
+            }else{
+                $strvalue = "'". addslashes($v) ."'";
             }
+
+            $set .= $k .'='.$strvalue .',';
+
         }
-        return $video;
+        $strfield=rtrim($set, ',');
+
+        return "UPDATE repairmans SET {$strfield},updated_at = now() WHERE id = $uid";
+
     }
 
-    public function getVideoUrlById($videoId)
-    {
-        $video = $this->makeModel()->newQuery()->select(
-            'id',
-            'act_flag as status',
-            'created_at'
-        )
-            ->find($videoId);
-        return $video;
-    }
+
 }

@@ -11,26 +11,31 @@
 |
 */
 
-$app->get('/', function () use ($app) {
-    var_dump(app()->environment());
-    return $app->version();
-
-});
-
-$app->get('test', function () use ($app) {
-//    phpinfo();
-//    dd();
-    $results = app('db')->select("select *,ST_DistanceSphere(geom,ST_GeomFromText('point(116.340714 39.992727)',4326)) dist from tbl_point where ST_DistanceSphere(geom,ST_GeomFromText('point(116.340714 39.992727)',4326)) < 10000 order by ST_DistanceSphere(geom,ST_GeomFromText('point(116.340714 39.992727)',4326)) limit 10");
-    var_dump($results);
-    $client = new \Predis\Client();
-    $client->append('foo', 'bar');
-    return 'foo stored as ' . $client->get('foo');
-});
 
 
-$app->group(['prefix' => 'pg','namespace' => 'pgApi'], function () use ($app) {
-    $app->get('searchGeom',[
-        'as' => 'profile', 'uses' => 'PgsqlApiController@searchGeom'
+$app->group(['prefix' => 'pg', 'namespace' => 'pgApi'], function () use ($app) {
+
+    //师傅路由
+    $app->get('search-repairman', [
+        'as' => 'searchRepairman', 'uses' => 'RepairmanApiController@search'
+    ]);
+    $app->get('insert-repairman', [
+        'as' => 'insertRepairman', 'uses' => 'RepairmanApiController@insert'
+    ]);
+    $app->get('save-repairman', [
+        'as' => 'saveRepairman', 'uses' => 'RepairmanApiController@save'
+    ]);
+
+
+    //工单路由
+    $app->get('search-order', [
+        'as' => 'searchOrder', 'uses' => 'OrderApiController@search'
+    ]);
+    $app->post('insert-order', [
+        'as' => 'insertOrder', 'uses' => 'OrderApiController@insert'
+    ]);
+    $app->get('save-order', [
+        'as' => 'saveOrder', 'uses' => 'OrderApiController@save'
     ]);
 });
 

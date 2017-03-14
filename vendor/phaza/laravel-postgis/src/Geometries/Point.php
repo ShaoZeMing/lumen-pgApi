@@ -57,7 +57,8 @@ class Point extends Geometry
 
     public function __toString()
     {
-        return $this->getLng() . ' ' . $this->getLat();
+//        return $this->getLng() . ' ' . $this->getLat();
+        return  $this->getLat() . ' ' .$this->getLng();
     }
 
     /**
@@ -69,4 +70,7 @@ class Point extends Geometry
     {
         return new \GeoJson\Geometry\Point([$this->getLng(), $this->getLat()]);
     }
+
+
+
 }

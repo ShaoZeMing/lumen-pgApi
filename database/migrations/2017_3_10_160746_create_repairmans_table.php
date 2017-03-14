@@ -20,7 +20,7 @@ class CreateRepairmansTable extends Migration
             $table->tinyInteger('status')->default(0)->comment('状态：0正常，1锁定');
             $table->text('address')->comment('地址');
             $table->bigInteger('uid')->comment('对应mysql师傅表id')->default(0);
-            $table->point('geom')->comment('geom位置数据');
+            $table->geometry('geom',4326)->comment('geom位置数据');
             $table->timestamps();
         });
     }

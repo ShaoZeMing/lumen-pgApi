@@ -23,7 +23,7 @@ class CreateOrdersTable extends Migration {
             $table->string('u_name',255)->comment('用户姓名');
             $table->string('mobile', 12)->comment('用户电话')->default(13333333333);
             $table->string('address')->comment('用户地址');
-            $table->point('geom')->comment('位置geom');
+            $table->geometry('geom',4326)->comment('位置geom');
             $table->timestamps();
         });
     }
