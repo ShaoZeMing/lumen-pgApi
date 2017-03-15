@@ -2,11 +2,12 @@
 
 namespace App\Repositories;
 
+use App\Events\Order;
 use App\Events\Repairman;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class RepairmanApiRepository extends BaseRepository
+class OrderApiRepository extends BaseRepository
 {
 
     /**
@@ -16,12 +17,12 @@ class RepairmanApiRepository extends BaseRepository
      */
     public function model()
     {
-        return Repairman::class;
+        return Order::class;
     }
 
 
     /**
-     * 搜索师傅.
+     * 搜索订单.
      *
      * @param string $filePath
      * @param bool   $immutable
@@ -39,7 +40,7 @@ class RepairmanApiRepository extends BaseRepository
         try{
             $result= DB::select($sql);
         }catch (\Exception $e){
-            Log::info('c=RepairmanApiRepository f=selectData  msg='.$e->getMessage());
+            Log::info('c=OrderApiRepository f=selectData  msg='.$e->getMessage());
             return false;
         }
         return $result;
@@ -62,7 +63,7 @@ class RepairmanApiRepository extends BaseRepository
         try{
             $result= DB::insert($sql);
         }catch (\Exception $e){
-            Log::info('c=RepairmanApiRepository f=insertData  msg='.$e->getMessage());
+            Log::info('c=OrderApiRepository f=insertData  msg='.$e->getMessage());
             return false;
         }
         return $result;
@@ -77,14 +78,14 @@ class RepairmanApiRepository extends BaseRepository
      * @return bool
      */
 
-    public  function saveData($data,$id)
+    public  function saveData($data,$o_id)
     {
-        $sql=$this->getSaveSql($data,$id);
+        $sql=$this->getSaveSql($data,$o_id);
 //        echo $sql;
         try{
             $result= DB::update($sql);
         }catch (\Exception $e){
-            Log::info('c=RepairmanApiRepository f=saveData  msg='.$e->getMessage());
+            Log::info('c=OrderApiRepository f=saveData  msg='.$e->getMessage());
             return false;
         }
         return $result;
@@ -97,7 +98,7 @@ class RepairmanApiRepository extends BaseRepository
 
 
     /**
-     * 拼装插入数据GIS sql语句.
+     * 拼装搜索数据GIS sql语句.
      *
      * @param string $filePath
      * @param array   $data 要插入的字段/数据
@@ -113,9 +114,9 @@ class RepairmanApiRepository extends BaseRepository
         $sql = "select *,
             ST_AsText(geom),
             {$distSql} dist
-            from repairmans
+            from orders
             where {$distSql} < {$dist}
-            AND status = {$status}
+            AND order_status = {$status}
             order by {$distSql}
             limit {$limit}";
 
@@ -148,7 +149,7 @@ class RepairmanApiRepository extends BaseRepository
         $strfield=rtrim($strfield, ',');
         $strvalue=rtrim($strvalue, ',');
 
-        return "insert into repairmans({$strfield},created_at,updated_at) VALUES ($strvalue,now(),now())";
+        return "insert into orders({$strfield},created_at,updated_at) VALUES ($strvalue,now(),now())";
 
     }
 
@@ -156,16 +157,16 @@ class RepairmanApiRepository extends BaseRepository
 
 
     /**
-     * 拼装修改师傅数据GIS sql语句.
+     * 拼装修改工单数据GIS sql语句.
      *
      * @param string $filePath
      * @param array   $data 要插入的字段/数据
-     * @param array   $uid  修改关联uid键
+     * @param array   $c_id  修改订单号
      *
      * @return string  sql
      */
 
-    protected function getSaveSql($data,$uid){
+    protected function getSaveSql($data,$c_id){
         $set='';
         foreach ($data as $k=>$v) {
             if($k=='geom'){
@@ -179,7 +180,7 @@ class RepairmanApiRepository extends BaseRepository
         }
         $strfield=rtrim($set, ',');
 
-        return "UPDATE repairmans SET {$strfield},updated_at = now() WHERE uid = '".$uid."'";
+        return "UPDATE orders SET {$strfield},updated_at = now() WHERE order_num = '".$c_id."'";
 
     }
 

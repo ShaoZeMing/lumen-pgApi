@@ -16,7 +16,7 @@ class Order extends Model
      */
     use PostgisTrait;
 
-    protected $table= 'repairmans';
+    protected $table= 'orders';
 
     protected $fillable = [
         'o_id',
@@ -27,6 +27,7 @@ class Order extends Model
         'c_name',
         'u_name',
         'mobile',
+        'description',
         'address',
         'created_at',
         'updated_at',

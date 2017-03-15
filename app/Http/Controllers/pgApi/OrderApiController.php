@@ -2,24 +2,26 @@
 
 namespace App\Http\Controllers\pgApi;
 
-use App\Events\Repairman;
 use App\Http\Controllers\Controller;
-use App\Repositories\RepairmanApiRepository;
-use GeoJson\Geometry\GeometryCollection;
+use App\Repositories\OrderApiRepository;
+use App\Validators\OrderValidator;
+use App\Validators\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Phaza\LaravelPostgis\Geometries\Point;
+use Illuminate\Validation\ValidationException;
 
 class OrderApiController extends Controller
 {
     public $request;
     public $apiRepository;
+    public $validator;
 
-    public function __construct(Request $request,RepairmanApiRepository $apiRepository)
+
+    public function __construct(Request $request,OrderValidator $validator,OrderApiRepository $apiRepository)
     {
         $this->request   = $request;
         $this->apiRepository   = $apiRepository;
-
+        $this->validator = $validator;
     }
     /**
      * 查询地理地址
@@ -33,36 +35,27 @@ class OrderApiController extends Controller
     public function search()
     {
 
-        //1.距离范围，2.地理位置
         $options = $this->request->all();
-        Log::info('c=PgsqlApiController f=searchGeom  options='.json_encode($options));
+        Log::info('c=OrderApiController f=search  options='.json_encode($options));
         $geom = isset($options['geom']) ? $options['geom'] : '';
-        $dist   = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE',10000);
-        $limit   = isset($options['limit'])  ? (int)$options['limit'] : env('LIMIT',10);
+        $dist   = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE',30000);
+        $limit   = isset($options['limit'])  ? (int)$options['limit'] : env('LIMIT',1000);
         $status = isset($options['status']) ? $options['status'] : 0;
         if(empty($geom)) {
-            Log::info('c=PgsqlApiController f=searchGeom  msg= '.config('message.5401'));
-            return [
-                'error' => 1,
-                'msg' =>'位置数据未传入',
-                'data' => '',
-            ];
+            Log::info('c=OrderApiController f=search  msg= 位置数据未知');
+            return $this->response_json(1,"位置数据未知",[],422);
         }
         $lists  = $this->apiRepository->selectData($geom,$dist,$status,$limit);
+        if($lists !==false){
+            return $this->response_json(0,"成功",$lists);
+        }else{
+            return $this->response_json(1,"失败",[],422);
+        }
 
-//        dd($lists);
-
-        $output = [
-            'error' => 0,
-            'msg' =>'成功',
-            'page' => count($lists),
-            'data' => $lists
-        ];
-        return response()->json($output);
     }
 
     /**
-     * 查询地理地址
+     * 插入地理地址
      *
      * @author shaozeming@xiaobaiyoupin.com
      *
@@ -72,39 +65,33 @@ class OrderApiController extends Controller
      */
     public function insert()
     {
+        try{
+            $this->validate(
+                $this->request,
+                $this->validator->getRules(Validator::RULE_CREATE),
+                $this->validator->getMassage());
+
+        }catch (ValidationException $e){
+            Log::info('c=OrderApiController f=insert  options=' .$this->response_msg($e->getResponse()));
+            return $this->response_msg($e->getResponse());
+        }
 
         //1.距离范围，2.地理位置
-        $options = $this->request->all();
-        Log::info('c=PgsqlApiController f=searchGeom  options='.json_encode($options));
-        $geom = isset($options['geom']) ? $options['geom'] : '';
-        $dist   = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE',10000);
-        $limit   = isset($options['limit'])  ? (int)$options['limit'] : env('LIMIT',10);
-        $status = isset($options['status']) ? $options['status'] : 0;
-        if(empty($geom)) {
-            Log::info('c=PgsqlApiController f=searchGeom  msg= '.config('message.5401'));
-            return [
-                'error' => 1,
-                'msg' =>'位置数据未传入',
-                'data' => '',
-            ];
+        $data = $this->request->all();
+        Log::info('c=OrderApiController f=insert  options='.json_encode($data));
+
+        $result = $this->apiRepository->insertData($data);
+        if($result !==false){
+            return $this->response_json(0,"添加成功",[]);
+        }else{
+            return $this->response_json(1,"添加失败",[],422);
         }
-        $lists  = $this->apiRepository->selectData($geom,$dist,$status,$limit);
-
-//        dd($lists);
-
-        $output = [
-            'error' => 0,
-            'msg' =>'成功',
-            'page' => count($lists),
-            'data' => $lists
-        ];
-        return response()->json($output);
     }
 
 
 
     /**
-     * 修改师傅地址信息
+     * 修改信息
      *
      * @author shaozeming@xiaobaiyoupin.com
      *
@@ -115,66 +102,27 @@ class OrderApiController extends Controller
     public function save()
     {
 
-//        //1.距离范围，2.地理位置
-//        $options = $this->request->all();
-//        Log::info('c=PgsqlApiController f=searchGeom  options='.json_encode($options));
-//        $geom = isset($options['geom']) ? $options['geom'] : '';
-//        $dist   = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE',10000);
-//        $limit   = isset($options['limit'])  ? (int)$options['limit'] : env('LIMIT',10);
-//        $status = isset($options['status']) ? $options['status'] : 0;
-//        if(empty($geom)) {
-//            Log::info('c=PgsqlApiController f=searchGeom  msg= '.config('message.5401'));
-//            return [
-//                'error' => 1,
-//                'msg' =>'位置数据未传入',
-//                'data' => '',
-//            ];
-//        }
+        try{
+            $this->validate(
+                $this->request,
+                $this->validator->getRules(Validator::RULE_UPDATE),
+                $this->validator->getMassage());
 
-        $lists  = $this->apiRepository->saveData([],192065);
-
-//        dd($lists);
-
-        $output = [
-            'error' => 0,
-            'msg' =>'成功',
-            'page' => count($lists),
-            'data' => $lists
-        ];
-        return response()->json($output);
-    }
-
-
-
-
-
-    /**
-     * 课程说明
-     *
-     * @author zhangjun@xiaobaiyoupin.com
-     *
-     * @param  Request $request
-     *
-     * @return mixed
-     */
-    public function desc(Request $request)
-    {
-        $options = $request->all();
-        Log::info('c=lesson f=list  options='.json_encode($options));
-        if(!isset($options['lesson_id']) || !(int)$options['lesson_id']) {
-            return $this->output_response(1073, [], config('messages.1073'));
+        }catch (ValidationException $e){
+            Log::info('c=OrderApiController f=save  msg=' .$this->response_msg($e->getResponse()));
+            return $this->response_msg($e->getResponse());
         }
-        $result = $this->lessonApiRepository->getLessonDescById($options['lesson_id']);
-        if(!$result) {
-            Log::info('c=video f=detail msg=课程说明不存在 lessonId='.$options['lesson_id']);
-            return $this->output_response(1077, [], config('messages.1077'));
+        $options = $this->request->all();
+        Log::info('c=OrderApiController f=save  msg='.json_encode($options));
+        $order_num = isset($options['order_num']) ? $options['order_num'] :0;
+
+        $result = $this->apiRepository->saveData($options,$order_num);
+
+        if($result!==false){
+            return $this->response_json(0,"修改成功",$result);
+        }else{
+            return $this->response_json(1,"修改失败",[],422);
         }
-        return $this->output_response(0, $result, config('messages.0'));
     }
-
-
-
-
-
 
 }

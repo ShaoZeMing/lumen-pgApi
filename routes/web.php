@@ -31,7 +31,7 @@ $app->group(['prefix' => 'pg', 'namespace' => 'pgApi'], function () use ($app) {
     $app->get('search-order', [
         'as' => 'searchOrder', 'uses' => 'OrderApiController@search'
     ]);
-    $app->post('insert-order', [
+    $app->get('insert-order', [
         'as' => 'insertOrder', 'uses' => 'OrderApiController@insert'
     ]);
     $app->get('save-order', [
