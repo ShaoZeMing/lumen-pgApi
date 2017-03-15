@@ -40,9 +40,10 @@ $app->group(['prefix' => 'pg', 'namespace' => 'pgApi'], function () use ($app) {
 });
 
 //['namespace' => 'Api']
-//$app->get('profile', [
-//    'as' => 'profile', 'uses' => 'UserController@showProfile'
-//]);
+$app->get('/', function () use ($app) {
+
+    return md5(uniqid());
+    });
 //
 //$app->group(['prefix' => 'admin'], function () use ($app) {
 //    $app->get('users', function ()    {
