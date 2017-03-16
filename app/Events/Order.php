@@ -19,22 +19,22 @@ class Order extends Model
     protected $table= 'orders';
 
     protected $fillable = [
-        'o_id',
-        'status',
-        'b_id',
-        'b_name',
-        'c_id',
-        'c_name',
-        'u_name',
-        'mobile',
+        'order_id',
+        'state',
+        'merchant_name',
+        'merchant_telphone',
+        'category_id',
+        'category_name',
+        'user_name',
+        'user_mobile',
         'description',
-        'address',
+        'full_address',
         'created_at',
         'updated_at',
     ];
 
     protected $postgisFields = [
-        'geom',
+        'order_geom',
     ];
 
 

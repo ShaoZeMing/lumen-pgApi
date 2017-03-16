@@ -13,17 +13,17 @@
 
 
 
-$app->group(['prefix' => 'pg', 'namespace' => 'pgApi'], function () use ($app) {
+$app->group(['prefix' => 'lbs', 'namespace' => 'LbsApi','middleware' => 'auth'], function () use ($app) {
 
     //师傅路由
-    $app->get('search-repairman', [
-        'as' => 'searchRepairman', 'uses' => 'RepairmanApiController@search'
+    $app->get('search-worker', [
+        'as' => 'searchRepairman', 'uses' => 'WorkerApiController@search'
     ]);
-    $app->get('insert-repairman', [
-        'as' => 'insertRepairman', 'uses' => 'RepairmanApiController@insert'
+    $app->post('insert-worker', [
+        'as' => 'insertRepairman', 'uses' => 'WorkerApiController@insert'
     ]);
-    $app->get('save-repairman', [
-        'as' => 'saveRepairman', 'uses' => 'RepairmanApiController@save'
+    $app->post('save-worker', [
+        'as' => 'saveRepairman', 'uses' => 'WorkerApiController@save'
     ]);
 
 
@@ -31,10 +31,10 @@ $app->group(['prefix' => 'pg', 'namespace' => 'pgApi'], function () use ($app) {
     $app->get('search-order', [
         'as' => 'searchOrder', 'uses' => 'OrderApiController@search'
     ]);
-    $app->get('insert-order', [
+    $app->post('insert-order', [
         'as' => 'insertOrder', 'uses' => 'OrderApiController@insert'
     ]);
-    $app->get('save-order', [
+    $app->post('save-order', [
         'as' => 'saveOrder', 'uses' => 'OrderApiController@save'
     ]);
 });

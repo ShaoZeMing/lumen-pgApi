@@ -6,24 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
 
-class Repairman extends Model
+class Worker extends Model
 {
     use PostgisTrait;
 
-    protected $table= 'repairmans';
+    protected $table= 'workers';
 
     protected $fillable = [
         'name',
         'mobile',
-        'status',
+        'state',
         'uid',
-        'address',
+        'full_address',
         'created_at',
         'updated_at',
     ];
 
     protected $postgisFields = [
-        'geom',
+        'worker_geom',
     ];
 
 
