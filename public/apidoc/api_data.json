@@ -393,6 +393,219 @@
   },
   {
     "type": "post",
+    "url": "/lbs/xxx-order",
+    "title": "工单表",
+    "description": "<p>定位工单表字段</p>",
+    "group": "Table_SQL",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "id",
+            "description": "<p>主键ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "smallint",
+            "optional": false,
+            "field": "state",
+            "description": "<p>工单状态(0:未接单<code>默认</code>，1:已接单，2:已完成，3:已取消)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "order_id",
+            "description": "<p>工单关联id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar(128)",
+            "optional": false,
+            "field": "full_address",
+            "description": "<p>联系人地址</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar(16)",
+            "optional": false,
+            "field": "user_name",
+            "description": "<p>联系人姓名</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "char(12)",
+            "optional": false,
+            "field": "user_mobile",
+            "description": "<p>联系人电话</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar(64)",
+            "optional": false,
+            "field": "merchant_name",
+            "description": "<p>厂商名称</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "char(12)",
+            "optional": false,
+            "field": "merchant_telphone",
+            "description": "<p>厂商联系方式</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "text",
+            "optional": false,
+            "field": "description",
+            "description": "<p>工单描述</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "category_id",
+            "description": "<p>分类id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar",
+            "optional": false,
+            "field": "category_name",
+            "description": "<p>分类名称</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "geometry(Point)",
+            "optional": false,
+            "field": "geom",
+            "description": "<p>位置坐标(注：字段类型为<code>geometry(Point,4326)</code>)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>创建时间`</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "updated_at",
+            "description": "<p>修改时间</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.1.0",
+    "success": {
+      "examples": [
+        {
+          "title": "SQL语句:",
+          "content": "{\n\"CREATE TABLE orders (\nid bigint NOT NULL,\norder_id bigint NOT NULL,\ndescription text,\nstate smallint DEFAULT '0'::smallint NOT NULL,\nmerchant_name character varying(64) DEFAULT ''::character varying NOT NULL,\nmerchant_telphone character varying(12) DEFAULT ''::character varying NOT NULL,\ncategory_id bigint DEFAULT '0'::bigint NOT NULL,\ncategory_name character varying(200) DEFAULT ''::character varying NOT NULL,\nuser_name character varying(255) DEFAULT ''::character varying NOT NULL,\nuser_mobile character varying(12) DEFAULT ''::character varying NOT NULL,\nfull_address character varying(255) DEFAULT ''::character varying NOT NULL,\ngeom geometry(Point,4326) NOT NULL,\ncreated_at timestamp(0) without time zone,\nupdated_at timestamp(0) without time zone\n);\n\nALTER TABLE orders OWNER TO postgres;\n\nCREATE SEQUENCE orders_id_seq\nSTART WITH 1\nINCREMENT BY 1\nNO MINVALUE\nNO MAXVALUE\nCACHE 1;\n\nALTER TABLE orders_id_seq OWNER TO postgres;\n\nALTER SEQUENCE orders_id_seq OWNED BY orders.id;\n\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/Http/Controllers/sql.php",
+    "groupTitle": "Table_SQL",
+    "name": "PostLbsXxxOrder"
+  },
+  {
+    "type": "post",
+    "url": "/lbs/xxxx-order",
+    "title": "师傅表",
+    "description": "<p>定位师傅表字段</p>",
+    "group": "Table_SQL",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "id",
+            "description": "<p>主键ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar(100)",
+            "optional": false,
+            "field": "name",
+            "description": "<p>姓名</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "char(12)",
+            "optional": false,
+            "field": "mobile",
+            "description": "<p>姓名</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "text",
+            "optional": false,
+            "field": "full_address",
+            "description": "<p>地址</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>关联ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "geometry(Point)",
+            "optional": false,
+            "field": "geom",
+            "description": "<p>地址(注：字段类型为<code>geometry(Point,4326)</code>)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "smallint",
+            "optional": false,
+            "field": "state",
+            "description": "<p>工单状态(0:未接单<code>默认</code>，1:已接单，2:已完成，3:已取消)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>创建时间`</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "updated_at",
+            "description": "<p>修改时间</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.1.0",
+    "success": {
+      "examples": [
+        {
+          "title": "SQL语句:",
+          "content": "{\nCREATE TABLE workers (\nid bigint NOT NULL,\nname character varying(100) NOT NULL,\nmobile character varying(12) NOT NULL,\nstate smallint DEFAULT '0'::smallint NOT NULL,\nfull_address text NOT NULL,\nuid bigint DEFAULT '0'::bigint NOT NULL,\ngeom geometry(Point,4326) NOT NULL,\ncreated_at timestamp(0) without time zone,\nupdated_at timestamp(0) without time zone\n);\n\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/Http/Controllers/sql.php",
+    "groupTitle": "Table_SQL",
+    "name": "PostLbsXxxxOrder"
+  },
+  {
+    "type": "post",
     "url": "/lbs/insert-worker",
     "title": "添加师傅",
     "description": "<p>添加师傅位置信息</p>",
@@ -471,7 +684,7 @@
   },
   {
     "type": "post",
-    "url": "/lbs/insert-worker",
+    "url": "/lbs/save-worker",
     "title": "修改师傅",
     "description": "<p>修改师傅信息</p>",
     "group": "Worker_LBS",
@@ -552,7 +765,7 @@
     },
     "filename": "app/Http/Controllers/LbsApi/WorkerApiController.php",
     "groupTitle": "Worker_LBS",
-    "name": "PostLbsInsertWorker"
+    "name": "PostLbsSaveWorker"
   },
   {
     "type": "get",

@@ -37,6 +37,17 @@ $app->group(['prefix' => 'lbs', 'namespace' => 'LbsApi','middleware' => 'auth'],
     $app->post('save-order', [
         'as' => 'saveOrder', 'uses' => 'OrderApiController@save'
     ]);
+
+    //导入数据路由
+
+    $app->get('sync-worker', [
+        'as' => 'syncWorker', 'uses' => 'CopydataApiController@sync'
+    ]);
+
+    $app->get('insert-worker', [
+        'as' => 'syncWorker', 'uses' => 'CopydataApiController@insert'
+    ]);
+
 });
 
 //['namespace' => 'Api']

@@ -165,7 +165,7 @@ class WorkerApiController extends Controller
     }
 
     /**
-     * @api {post} /lbs/insert-worker 修改师傅
+     * @api {post} /lbs/save-worker 修改师傅
      * @apiDescription 修改师傅信息
      * @apiGroup Worker-LBS
      * @apiPermission none
