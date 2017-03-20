@@ -79,10 +79,10 @@ class OrderApiRepository extends BaseRepository
      * @return bool
      */
 
-    public function saveData($data, $o_id)
+    public function saveData($data, $order_no)
     {
-        $sql = $this->getSaveSql($data, $o_id);
-        echo $sql;
+        $sql = $this->getSaveSql($data, $order_no);
+//        dd( $sql);
         try {
             $result = DB::update($sql);
         } catch (\Exception $e) {
@@ -116,7 +116,6 @@ class OrderApiRepository extends BaseRepository
             AND state = {$status}
             order by {$distSql}
             limit {$limit}";
-
         return $sql;
 
     }
@@ -136,10 +135,8 @@ class OrderApiRepository extends BaseRepository
         $strfield = '';
         $strvalue = '';
         $data['geom']=$data['user_lng'].' '.$data['user_lat'];
+        unset($data['lbs_token']);
         foreach ($data as $k => $v) {
-            if($k =='user_lat'|| $k=="lbs_token" || $k =='user_lng') {
-                continue;
-            }
             $strfield .= $k.',';
             if ($k == 'geom') {
                 $strvalue .= "ST_GeomFromText('POINT(" . addslashes($v) . ")',4326),";
@@ -165,27 +162,24 @@ class OrderApiRepository extends BaseRepository
      * @return string  sql
      */
 
-    protected function getSaveSql($data, $order_id)
+    protected function getSaveSql($data, $order_no)
     {
         $set = '';
+        unset($data['lbs_token']);
         if(isset($data['user_lng'])&& isset($data['user_lat'])){
             $data['geom']=$data['user_lng'].' '.$data['user_lat'];
         }
         foreach ($data as $k => $v) {
-            if($k =='user_lat'|| $k=="lbs_token" || $k =='user_lng') {
-                continue;
-            }
             if ($k == 'geom') {
                 $strvalue = "ST_GeomFromText('POINT(".addslashes($v).")',4326)";
             } else {
                 $strvalue = "'" . addslashes($v) . "'";
             }
             $set .= $k . '=' . $strvalue . ',';
-
         }
         $strfield = rtrim($set, ',');
 
-        return "UPDATE orders SET {$strfield},updated_at = now() WHERE order_id = '" . $order_id . "'";
+        return "UPDATE orders SET {$strfield},updated_at = now() WHERE order_no = '" . $order_no . "'";
 
 
 

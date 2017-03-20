@@ -28,7 +28,7 @@ define({ "api": [
       "examples": [
         {
           "title": "成功-Response:",
-          "content": "{\n \"error\": 0,\n \"msg\": \"同步成功\",\n \"data\": []\n}",
+          "content": "{\n\"error\": 0,\n\"msg\": \"本次共同步了108003条数据，用时:9.46秒\",\n\"data\": []\n}",
           "type": "json"
         }
       ]
@@ -69,24 +69,17 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "Decimal",
-            "optional": false,
-            "field": "user_lng",
-            "description": "<p>经度</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Decimal",
-            "optional": false,
-            "field": "user_lat",
-            "description": "<p>纬度</p>"
-          },
-          {
-            "group": "Parameter",
             "type": "BigInt",
             "optional": false,
-            "field": "order_id",
-            "description": "<p>工单ID编号</p>"
+            "field": "order_no",
+            "description": "<p>工单编号</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "order_desc",
+            "description": "<p>工单描述</p>"
           },
           {
             "group": "Parameter",
@@ -94,6 +87,13 @@ define({ "api": [
             "optional": false,
             "field": "full_address",
             "description": "<p>联系人地址</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "user_id",
+            "description": "<p>用户id</p>"
           },
           {
             "group": "Parameter",
@@ -111,6 +111,13 @@ define({ "api": [
           },
           {
             "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "merchant_id",
+            "description": "<p>厂商id</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "String",
             "optional": false,
             "field": "merchant_name",
@@ -125,24 +132,59 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "description",
-            "description": "<p>工单描述</p>"
+            "type": "float",
+            "optional": false,
+            "field": "user_lat",
+            "description": "<p>纬度</p>"
           },
           {
             "group": "Parameter",
-            "type": "BigInt",
-            "optional": true,
-            "field": "category_id",
-            "description": "<p>分类id</p>"
+            "type": "float",
+            "optional": false,
+            "field": "user_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "published_at",
+            "description": "<p>发布工单时间</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": true,
-            "field": "category_name",
-            "description": "<p>分类名称</p>"
+            "field": "big_cat",
+            "description": "<p>大类</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "middle_cat",
+            "description": "<p>中类</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": true,
+            "field": "small_cat",
+            "description": "<p>小类</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "order_type",
+            "description": "<p>0保内/1保外</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "biz_type",
+            "description": "<p>0安装/1维修</p>"
           }
         ]
       }
@@ -161,7 +203,7 @@ define({ "api": [
       "examples": [
         {
           "title": "错误例子:",
-          "content": "{\n\"error\": 1,\n\"msg\": \"验证错误：工单编号已存在(order_id),\",\n\"data\": []\n}",
+          "content": "{\n\"error\": 1,\n\"msg\": \"验证错误：未获得详细联系地址！(full_address),\",\n\"data\": []\n}",
           "type": "json"
         }
       ]
@@ -234,7 +276,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/lbs/search-order",
-    "title": "工单搜索",
+    "title": "工单搜索(json)",
     "name": "shaozeming_xiaobaiyoupin_com",
     "description": "<p>针对师傅位置对指定范围的可接工单进行搜索</p>",
     "group": "Order_LBS",
@@ -251,7 +293,7 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "lbs_token",
-            "description": "<p>认证秘钥</p>"
+            "description": "<p>秘钥</p>"
           },
           {
             "group": "Parameter",
@@ -279,14 +321,28 @@ define({ "api": [
             "type": "Int",
             "optional": true,
             "field": "limit",
-            "description": "<p>返回条数</p>"
+            "description": "<p>返回最多条数</p>"
           },
           {
             "group": "Parameter",
             "type": "Int",
             "optional": true,
             "field": "state",
-            "description": "<p>订单状态(0:待接单，1:已接单，2:已完成，4:已取消)默认为0</p>"
+            "description": "<p>订单状态(0:待接单，1:已接单)默认为0</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "biz_type",
+            "description": "<p>0安装/1维修</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "small_cat",
+            "description": "<p>小类 &quot;created_at&quot;: &quot;2017-03-20 18:36:31&quot;, &quot;updated_at&quot;: &quot;2017-03-20 18:36:31&quot;, &quot;dist&quot;: &quot;2223.90159469&quot; }, { &quot;id&quot;: &quot;4&quot;, &quot;order_no&quot;: &quot;1229282922&quot;, &quot;order_desc&quot;: &quot;不开机的&quot;, &quot;state&quot;: 0, &quot;order_type&quot;: 0, &quot;biz_type&quot;: 0, &quot;merchant_id&quot;: &quot;4&quot;, &quot;merchant_name&quot;: &quot;小米&quot;, &quot;merchant_tel&quot;: &quot;13330333876&quot;, &quot;user_id&quot;: &quot;232&quot;, &quot;user_name&quot;: &quot;少爷&quot;, &quot;user_mobile&quot;: &quot;18888888888&quot;, &quot;user_lat&quot;: &quot;39.33&quot;, &quot;user_lng&quot;: &quot;119.84&quot;, &quot;full_address&quot;: &quot;清华大学一栋28号&quot;, &quot;geom&quot;: &quot;0101000020E61000005D50DF32A7F55D40F46C567DAEAA4340&quot;, &quot;published_at&quot;: &quot;2017-03-20 23:34:33&quot;, &quot;big_cat&quot;: &quot;&quot;, &quot;middle_cat&quot;: &quot;&quot;, &quot;small_cat&quot;: &quot;&quot;, &quot;created_at&quot;: &quot;2017-03-20 18:38:13&quot;, &quot;updated_at&quot;: &quot;2017-03-20 18:38:13&quot;, &quot;dist&quot;: &quot;2223.90159469&quot; } ] } }</p>"
           }
         ]
       }
@@ -298,8 +354,8 @@ define({ "api": [
             "group": "Success 200",
             "type": "BigInt",
             "optional": false,
-            "field": "order_id",
-            "description": "<p>工单ID编号</p>"
+            "field": "order_no",
+            "description": "<p>工单编号</p>"
           },
           {
             "group": "Success 200",
@@ -312,8 +368,22 @@ define({ "api": [
             "group": "Success 200",
             "type": "String",
             "optional": false,
+            "field": "order_desc",
+            "description": "<p>工单描述</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
             "field": "full_address",
             "description": "<p>联系人地址</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "int",
+            "optional": false,
+            "field": "user_id",
+            "description": "<p>用户id</p>"
           },
           {
             "group": "Success 200",
@@ -331,6 +401,13 @@ define({ "api": [
           },
           {
             "group": "Success 200",
+            "type": "int",
+            "optional": false,
+            "field": "merchant_id",
+            "description": "<p>厂商id</p>"
+          },
+          {
+            "group": "Success 200",
             "type": "String",
             "optional": false,
             "field": "merchant_name",
@@ -345,31 +422,66 @@ define({ "api": [
           },
           {
             "group": "Success 200",
-            "type": "String",
+            "type": "float",
             "optional": false,
-            "field": "description",
-            "description": "<p>工单描述</p>"
+            "field": "user_lat",
+            "description": "<p>纬度</p>"
           },
           {
             "group": "Success 200",
-            "type": "BigInt",
+            "type": "float",
             "optional": false,
-            "field": "category_id",
-            "description": "<p>分类id</p>"
+            "field": "user_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "geom",
+            "description": "<p>位置几何</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "category_name",
-            "description": "<p>分类名称</p>"
+            "field": "published_at",
+            "description": "<p>发布工单时间</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
-            "field": "created_at",
-            "description": "<p>创建时间</p>"
+            "field": "big_cat",
+            "description": "<p>大类</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "middle_cat",
+            "description": "<p>中类</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "small_cat",
+            "description": "<p>小类</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "int",
+            "optional": false,
+            "field": "order_type",
+            "description": "<p>0保内/1保外</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "int",
+            "optional": false,
+            "field": "biz_type",
+            "description": "<p>0安装/1维修</p>"
           },
           {
             "group": "Success 200",
@@ -383,7 +495,7 @@ define({ "api": [
       "examples": [
         {
           "title": "成功响应例子:",
-          "content": "{\n\"error\": 0,\n\"msg\": \"成功\",\n\"data\": {\n\"size\": 3,\n\"list\": [\n{\n\"id\": \"1\",\n\"order_id\": \"12315\",\n\"description\": \"电视坏了，快来修\",\n\"state\": 0,\n\"merchant_name\": \"小米科技\",\n\"merchant_telphone\": \"0103456789\",\n\"category_id\": \"4\",\n\"category_name\": \"家电\",\n\"user_name\": \"流沙\",\n\"user_mobile\": \"15196566135\",\n\"full_address\": \"五道口家园\",\n\"geom\": \"0101000020E61000007B319413ED8E5E4059C0046EDD9D4640\",\n\"created_at\": \"2017-03-16 18:17:17\",\n\"updated_at\": \"2017-03-16 18:17:17\",\n\"dist\": \"0\"\n},\n{\n\"id\": \"2\",\n\"order_id\": \"123152\",\n\"description\": \"电视坏了，快来修\",\n\"state\": 0,\n\"merchant_name\": \"小米科技\",\n\"merchant_telphone\": \"0103456789\",\n\"category_id\": \"4\",\n\"category_name\": \"家电\",\n\"user_name\": \"明月\",\n\"user_mobile\": \"15196986655\",\n\"full_address\": \"峨眉清风塔\",\n\"geom\": \"0101000020E6100000895E46B1DC8E5E403A3B191C259F4640\",\n\"created_at\": \"2017-03-16 18:18:03\",\n\"updated_at\": \"2017-03-16 18:18:03\",\n\"dist\": \"1114.70414013\"\n},\n{\n\"id\": \"3\",\n\"order_id\": \"1231524\",\n\"description\": \"冰箱坏坏了，快来修\",\n\"state\": 0,\n\"merchant_name\": \"小米科技\",\n\"merchant_telphone\": \"0103456789\",\n\"category_id\": \"4\",\n\"category_name\": \"家电\",\n\"user_name\": \"明月\",\n\"user_mobile\": \"15194586135\",\n\"full_address\": \"蜀山\",\n\"geom\": \"0101000020E61000009EEA909BE18E5E406553AEF02E9F4640\",\n\"created_at\": \"2017-03-16 18:18:40\",\n\"updated_at\": \"2017-03-16 18:18:40\",\n\"dist\": \"1146.6200287\"\n}\n]\n}\n}",
+          "content": "{\n\"error\": 0,\n\"msg\": \"成功\",\n\"data\": {\n\"size\": 2,\n\"list\": [\n{\n\"id\": \"3\",\n\"order_no\": \"1229282922\",\n\"order_desc\": \"不开机的喂不了\",\n\"state\": 0,\n\"order_type\": 0,\n\"biz_type\": 0,\n\"merchant_id\": \"4\",\n\"merchant_name\": \"小米\",\n\"merchant_tel\": \"13330333876\",\n\"user_id\": \"232\",\n\"user_name\": \"小姐\",\n\"user_mobile\": \"18888888888\",\n\"user_lat\": \"39.33\",\n\"user_lng\": \"119.84\",\n\"full_address\": \"清华大学一栋28号\",\n\"geom\": \"0101000020E61000005D50DF32A7F55D40F46C567DAEAA4340\",\n\"published_at\": \"2017-03-19 00:00:00\",\n\"big_cat\": \"\",\n\"middle_cat\": \"\",\n\"small_cat\": \"\",",
           "type": "json"
         }
       ]
@@ -400,219 +512,6 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "app/Http/Controllers/LbsApi/OrderApiController.php",
     "groupTitle": "Order_LBS"
-  },
-  {
-    "type": "sql",
-    "url": "/lbs/orders",
-    "title": "工单表",
-    "description": "<p>定位工单表字段</p>",
-    "group": "Table_SQL",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "bigint",
-            "optional": false,
-            "field": "id",
-            "description": "<p>主键ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "smallint",
-            "optional": false,
-            "field": "state",
-            "description": "<p>工单状态(0:未接单，1:已接), 默认值：<code>0</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "bigint",
-            "optional": false,
-            "field": "order_id",
-            "description": "<p>工单关联id, 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "varchar(128)",
-            "optional": false,
-            "field": "full_address",
-            "description": "<p>联系人地址, 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "varchar(16)",
-            "optional": false,
-            "field": "user_name",
-            "description": "<p>联系人姓名, 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "char(12)",
-            "optional": false,
-            "field": "user_mobile",
-            "description": "<p>联系人电话, 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "varchar(64)",
-            "optional": false,
-            "field": "merchant_name",
-            "description": "<p>厂商名称, 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "char(12)",
-            "optional": false,
-            "field": "merchant_telphone",
-            "description": "<p>厂商联系方式, 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "text",
-            "optional": false,
-            "field": "description",
-            "description": "<p>工单描述, 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "bigint",
-            "optional": false,
-            "field": "category_id",
-            "description": "<p>分类id, 默认值：<code>0</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "varchar",
-            "optional": false,
-            "field": "category_name",
-            "description": "<p>分类名称, 默认值：<code>&quot;&quot;</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "geometry(Point)",
-            "optional": false,
-            "field": "geom",
-            "description": "<p>位置坐标(注：字段类型为<code>geometry(Point,4326)</code>), 默认值：<code>NOT NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "timestamp",
-            "optional": false,
-            "field": "created_at",
-            "description": "<p>创建时间, 默认值：<code>NULL</code></p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "timestamp",
-            "optional": false,
-            "field": "updated_at",
-            "description": "<p>修改时间, 默认值：<code>NULL</code></p>"
-          }
-        ]
-      }
-    },
-    "version": "0.1.0",
-    "success": {
-      "examples": [
-        {
-          "title": "SQL语句:",
-          "content": "{\n\"CREATE TABLE orders (\nid bigint NOT NULL,\norder_id bigint NOT NULL,\ndescription text,\nstate smallint DEFAULT '0'::smallint NOT NULL,\nmerchant_name character varying(64) DEFAULT ''::character varying NOT NULL,\nmerchant_telphone character varying(12) DEFAULT ''::character varying NOT NULL,\ncategory_id bigint DEFAULT '0'::bigint NOT NULL,\ncategory_name character varying(200) DEFAULT ''::character varying NOT NULL,\nuser_name character varying(255) DEFAULT ''::character varying NOT NULL,\nuser_mobile character varying(12) DEFAULT ''::character varying NOT NULL,\nfull_address character varying(255) DEFAULT ''::character varying NOT NULL,\ngeom geometry(Point,4326) NOT NULL,\ncreated_at timestamp(0) without time zone,\nupdated_at timestamp(0) without time zone\n);\n\nALTER TABLE orders OWNER TO postgres;\n\nCREATE SEQUENCE orders_id_seq\nSTART WITH 1\nINCREMENT BY 1\nNO MINVALUE\nNO MAXVALUE\nCACHE 1;\n\nALTER TABLE orders_id_seq OWNER TO postgres;\n\nALTER SEQUENCE orders_id_seq OWNED BY orders.id;\n\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "app/Http/Controllers/sql.php",
-    "groupTitle": "Table_SQL",
-    "name": "SqlLbsOrders"
-  },
-  {
-    "type": "sql",
-    "url": "/lbs/workers",
-    "title": "师傅表",
-    "description": "<p>定位师傅表字段</p>",
-    "group": "Table_SQL",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "bigint",
-            "optional": false,
-            "field": "id",
-            "description": "<p>主键ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "varchar(100)",
-            "optional": false,
-            "field": "name",
-            "description": "<p>姓名：(<code>NOT NULL</code>)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "char(12)",
-            "optional": false,
-            "field": "mobile",
-            "description": "<p>电话：(<code>NOT NULL</code>)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "text",
-            "optional": false,
-            "field": "full_address",
-            "description": "<p>地址：(<code>NOT NULL</code>)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "bigint",
-            "optional": false,
-            "field": "uid",
-            "description": "<p>关联ID：(<code>NOT NULL</code>)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "geometry(Point)",
-            "optional": false,
-            "field": "geom",
-            "description": "<p>地址(注：字段类型为<code>geometry(Point,4326)</code>)：(<code>NOT NULL</code>)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "smallint",
-            "optional": false,
-            "field": "state",
-            "description": "<p>工单状态(0:正常<code>默认</code>，1:锁定)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "timestamp",
-            "optional": false,
-            "field": "created_at",
-            "description": "<p>创建时间：(<code>NULL</code>)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "timestamp",
-            "optional": false,
-            "field": "updated_at",
-            "description": "<p>修改时间：(<code>NULL</code>)</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.1.0",
-    "success": {
-      "examples": [
-        {
-          "title": "SQL语句:",
-          "content": "{\nCREATE TABLE workers (\nid bigint NOT NULL,\nname character varying(100) NOT NULL,\nmobile character varying(12) NOT NULL,\nstate smallint DEFAULT '0'::smallint NOT NULL,\nfull_address text NOT NULL,\nuid bigint DEFAULT '0'::bigint NOT NULL,\ngeom geometry(Point,4326) NOT NULL,\ncreated_at timestamp(0) without time zone,\nupdated_at timestamp(0) without time zone\n);\n\"\n}",
-          "type": "json"
-        }
-      ]
-    },
-    "filename": "app/Http/Controllers/sql.php",
-    "groupTitle": "Table_SQL",
-    "name": "SqlLbsWorkers"
   },
   {
     "type": "post",
@@ -637,31 +536,24 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "Decimal",
-            "optional": false,
-            "field": "worker_lng",
-            "description": "<p>经度</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "Decimal",
-            "optional": false,
-            "field": "worker_lat",
-            "description": "<p>纬度</p>"
-          },
-          {
-            "group": "Parameter",
             "type": "BigInt",
             "optional": false,
             "field": "uid",
-            "description": "<p>师傅ID编号</p>"
+            "description": "<p>关联ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "dist",
+            "description": "<p>距离(米)</p>"
           },
           {
             "group": "Parameter",
             "type": "String",
             "optional": false,
             "field": "full_address",
-            "description": "<p>联系人地址</p>"
+            "description": "<p>地址</p>"
           },
           {
             "group": "Parameter",
@@ -676,6 +568,41 @@ define({ "api": [
             "optional": false,
             "field": "mobile",
             "description": "<p>电话</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": false,
+            "field": "worker_lat",
+            "description": "<p>纬度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": false,
+            "field": "worker_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "geom",
+            "description": "<p>位置几何</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>创建时间</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "updated_at",
+            "description": "<p>修改时间</p>"
           }
         ]
       }
@@ -729,7 +656,7 @@ define({ "api": [
             "type": "Bigint",
             "optional": false,
             "field": "uid",
-            "description": "<p>师傅uid</p>"
+            "description": "<p>关联id</p>"
           },
           {
             "group": "Parameter",
@@ -769,7 +696,7 @@ define({ "api": [
     "url": "/lbs/search-worker",
     "title": "搜索师傅",
     "name": "shaozeming_xiaobaiyoupin_com",
-    "description": "<p>针对师傅位置对师傅进行搜索</p>",
+    "description": "<p>针对位置对附近师傅进行搜索</p>",
     "group": "Worker_LBS",
     "permission": [
       {
@@ -819,7 +746,7 @@ define({ "api": [
             "type": "Int",
             "optional": true,
             "field": "limit",
-            "description": "<p>返回条数</p>"
+            "description": "<p>返回最多条数</p>"
           }
         ]
       }
@@ -831,8 +758,15 @@ define({ "api": [
             "group": "Success 200",
             "type": "BigInt",
             "optional": false,
+            "field": "id",
+            "description": "<p>主键ID</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "BigInt",
+            "optional": false,
             "field": "uid",
-            "description": "<p>师傅ID编号</p>"
+            "description": "<p>关联ID</p>"
           },
           {
             "group": "Success 200",
@@ -846,21 +780,42 @@ define({ "api": [
             "type": "String",
             "optional": false,
             "field": "full_address",
-            "description": "<p>联系人地址</p>"
+            "description": "<p>地址</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
             "field": "name",
-            "description": "<p>联系人姓名</p>"
+            "description": "<p>姓名</p>"
           },
           {
             "group": "Success 200",
             "type": "String",
             "optional": false,
             "field": "mobile",
-            "description": "<p>联系人电话</p>"
+            "description": "<p>电话</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "float",
+            "optional": false,
+            "field": "worker_lat",
+            "description": "<p>纬度</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "float",
+            "optional": false,
+            "field": "worker_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "geom",
+            "description": "<p>位置几何</p>"
           },
           {
             "group": "Success 200",
@@ -881,7 +836,7 @@ define({ "api": [
       "examples": [
         {
           "title": "成功-Response:",
-          "content": "{\n\"error\": 0,\n\"msg\": \"成功\",\n\"data\": {\n\"size\": 3,\n\"list\": [\n{\n\"id\": \"4\",\n\"name\": \"近平先生\",\n\"mobile\": \"15884565443\",\n\"state\": 0,\n\"full_address\": \"中关村创业大街123号\",\n\"uid\": \"67\",\n\"geom\": \"0101000020E610000060EAE74D45905E40EE42739D469E4640\",\n\"created_at\": \"2017-03-16 18:58:36\",\n\"updated_at\": \"2017-03-16 18:58:36\",\n\"st_astext\": \"POINT(122.25423 45.23653)\",\n\"dist\": \"1097.49543698\"\n},\n{\n\"id\": \"3\",\n\"name\": \"雷军\",\n\"mobile\": \"15444565443\",\n\"state\": 0,\n\"full_address\": \"华清家园\",\n\"uid\": \"12\",\n\"geom\": \"0101000020E61000007E6FD39FFD8E5E404451A04FE49D4640\",\n\"created_at\": \"2017-03-16 18:57:38\",\n\"updated_at\": \"2017-03-16 18:57:38\",\n\"st_astext\": \"POINT(122.23423 45.23353)\",\n\"dist\": \"2121.35513343\"\n},\n{\n\"id\": \"2\",\n\"name\": \"弥勒法\",\n\"mobile\": \"1333333333\",\n\"state\": 0,\n\"full_address\": \"少林寺\",\n\"uid\": \"234\",\n\"geom\": \"0101000020E61000007E6FD39FFD8E5E407D96E7C1DD9D4640\",\n\"created_at\": \"2017-03-16 18:56:40\",\n\"updated_at\": \"2017-03-16 18:56:40\",\n\"st_astext\": \"POINT(122.23423 45.23333)\",\n\"dist\": \"2136.42281823\"\n}\n]\n}\n}",
+          "content": "{\n\"error\": 0,\n\"msg\": \"成功\",\n\"data\": {\n\"size\": 2,\n\"list\": [\n{\n\"id\": \"108004\",\n\"name\": \"明明\",\n\"mobile\": \"13332425562\",\n\"state\": 0,\n\"worker_lat\": \"39.33\",\n\"worker_lng\": \"119.94\",\n\"full_address\": \"中关村五道口\",\n\"uid\": \"233334\",\n\"geom\": \"0101000020E6100000C3B645990DFC5D402D78D15790AA4340\",\n\"created_at\": \"2017-03-20 18:30:18\",\n\"updated_at\": \"2017-03-20 18:30:18\",\n\"st_astext\": \"POINT(119.93833 39.33253)\",\n\"dist\": \"0\"\n},\n{\n\"id\": \"1\",\n\"name\": \"明明\",\n\"mobile\": \"13332425562\",\n\"state\": 0,\n\"worker_lat\": \"39.33\",\n\"worker_lng\": \"158.94\",\n\"full_address\": \"中关村五道口\",\n\"uid\": \"1\",\n\"geom\": \"0101000020E6100000C3B645990DFC5D402D78D15790AA4340\",\n\"created_at\": \"2017-03-17 15:25:05\",\n\"updated_at\": \"2017-03-20 18:55:56\",\n\"st_astext\": \"POINT(119.93833 39.33253)\",\n\"dist\": \"0\"\n}\n]\n}\n}",
           "type": "json"
         }
       ]
@@ -889,5 +844,288 @@ define({ "api": [
     "version": "0.0.0",
     "filename": "app/Http/Controllers/LbsApi/WorkerApiController.php",
     "groupTitle": "Worker_LBS"
+  },
+  {
+    "type": "sql",
+    "url": "/lbs/orders",
+    "title": "工单表",
+    "description": "<p>LBS系统工单表结构</p>",
+    "group": "Z_Table_SQL",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "id",
+            "description": "<p>主键ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "tinyInt",
+            "optional": false,
+            "field": "state",
+            "description": "<p>工单状态, 默认值：<code>0</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "order_no",
+            "description": "<p>工单号,</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar",
+            "optional": false,
+            "field": "order_desc",
+            "description": "<p>工单描述</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "tinyInt",
+            "optional": false,
+            "field": "order_type",
+            "description": "<p>0保内/1保外, 默认值：<code>0</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "tinyInt",
+            "optional": false,
+            "field": "biz_type",
+            "description": "<p>0安装/1维修, 默认值：<code>0</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "BigInt",
+            "optional": false,
+            "field": "merchant_id",
+            "description": "<p>商家id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar(64)",
+            "optional": false,
+            "field": "merchant_name",
+            "description": "<p>厂商名称</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "char(12)",
+            "optional": false,
+            "field": "merchant_tel",
+            "description": "<p>厂商联系方式</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "user_id",
+            "description": "<p>联系人姓名, 默认值</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar(16)",
+            "optional": false,
+            "field": "user_name",
+            "description": "<p>联系人姓名</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "char(12)",
+            "optional": false,
+            "field": "user_mobile",
+            "description": "<p>联系人电话</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "decimal",
+            "optional": false,
+            "field": "user_lat",
+            "description": "<p>纬度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "decimal",
+            "optional": false,
+            "field": "user_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar(128)",
+            "optional": false,
+            "field": "full_address",
+            "description": "<p>联系人地址</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar",
+            "optional": false,
+            "field": "big_cat",
+            "description": "<p>大类,默认值:<code>&quot;&quot;</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar",
+            "optional": false,
+            "field": "middle_cat",
+            "description": "<p>中类,默认值:<code>&quot;&quot;</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar",
+            "optional": false,
+            "field": "small_cat",
+            "description": "<p>小类,默认值:<code>&quot;&quot;</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "geometry(Point)",
+            "optional": false,
+            "field": "geom",
+            "description": "<p>位置坐标(注：字段类型为<code>geometry(Point,4326)</code>), 默认值：<code>NOT NULL</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "published_at",
+            "description": "<p>发布时间, 默认值：<code>NULL</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>创建时间, 默认值：<code>NULL</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "updated_at",
+            "description": "<p>修改时间, 默认值：<code>NULL</code></p>"
+          }
+        ]
+      }
+    },
+    "version": "0.1.0",
+    "success": {
+      "examples": [
+        {
+          "title": "创建表SQL语句:",
+          "content": "\nCREATE TABLE orders (\nid bigint NOT NULL,\norder_no character varying(255) NOT NULL,\norder_desc character varying(255) NOT NULL,\nstate smallint DEFAULT '0'::smallint NOT NULL,\norder_type smallint DEFAULT '0'::smallint NOT NULL,\nbiz_type smallint DEFAULT '0'::smallint NOT NULL,\nmerchant_id bigint NOT NULL,\nmerchant_name character varying(64) NOT NULL,\nmerchant_tel character varying(12) NOT NULL,\nuser_id bigint NOT NULL,\nuser_name character varying(255) NOT NULL,\nuser_mobile character varying(12) NOT NULL,\nuser_lat numeric(8,2) NOT NULL,\nuser_lng numeric(8,2) NOT NULL,\nfull_address character varying(255) NOT NULL,\ngeom geometry(Point,4326) NOT NULL,\npublished_at timestamp(0) without time zone NOT NULL,\nbig_cat character varying(255) DEFAULT ''::character varying NOT NULL,\nmiddle_cat character varying(255) DEFAULT ''::character varying NOT NULL,\nsmall_cat character varying(255) DEFAULT ''::character varying NOT NULL,\ncreated_at timestamp(0) without time zone,\nupdated_at timestamp(0) without time zone\n);\n\nALTER TABLE orders OWNER TO postgres;\n\nCREATE SEQUENCE orders_id_seq\nSTART WITH 1\nINCREMENT BY 1\nNO MINVALUE\nNO MAXVALUE\nCACHE 1;\n\nALTER TABLE orders_id_seq OWNER TO postgres;\nALTER SEQUENCE orders_id_seq OWNED BY orders.id;\nALTER TABLE ONLY orders ALTER COLUMN id SET DEFAULT nextval('orders_id_seq'::regclass);\nALTER TABLE ONLY orders ADD CONSTRAINT orders_pkey PRIMARY KEY (id);\nCREATE INDEX orders_order_no_index ON orders USING btree (order_no);",
+          "type": "sql"
+        }
+      ]
+    },
+    "filename": "app/Http/Controllers/sql.php",
+    "groupTitle": "Z_Table_SQL",
+    "name": "SqlLbsOrders"
+  },
+  {
+    "type": "sql",
+    "url": "/lbs/workers",
+    "title": "师傅表",
+    "description": "<p>LBS系统师傅表结构</p>",
+    "group": "Z_Table_SQL",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "id",
+            "description": "<p>主键ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar",
+            "optional": false,
+            "field": "name",
+            "description": "<p>姓名</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "char(12)",
+            "optional": false,
+            "field": "mobile",
+            "description": "<p>电话</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "varchar",
+            "optional": false,
+            "field": "full_address",
+            "description": "<p>地址</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bigint",
+            "optional": false,
+            "field": "uid",
+            "description": "<p>关联ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "decimal",
+            "optional": false,
+            "field": "worker_lat",
+            "description": "<p>纬度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "decimal",
+            "optional": false,
+            "field": "worker_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "geometry(Point)",
+            "optional": false,
+            "field": "geom",
+            "description": "<p>地址(注：字段类型为<code>geometry(Point,4326)</code>)：(<code>NOT NULL</code>)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "tinyInt",
+            "optional": false,
+            "field": "state",
+            "description": "<p>工单状态(0:正常，1:锁定),默认值：<code>0</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "created_at",
+            "description": "<p>创建时间,默认值：<code>NULL</code></p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "timestamp",
+            "optional": false,
+            "field": "updated_at",
+            "description": "<p>修改时间,默认值：(<code>NULL</code>)</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.1.0",
+    "success": {
+      "examples": [
+        {
+          "title": "创建SQL语句:",
+          "content": "\nCREATE TABLE workers (\nid bigint NOT NULL,\nname character varying(100) NOT NULL,\nmobile character varying(12) NOT NULL,\nstate smallint DEFAULT '0'::smallint NOT NULL,\nworker_lat numeric(8,2) NOT NULL,\nworker_lng numeric(8,2) NOT NULL,\nfull_address text NOT NULL,\nuid bigint DEFAULT '0'::bigint NOT NULL,\ngeom geometry(Point,4326) NOT NULL,\ncreated_at timestamp(0) without time zone,\nupdated_at timestamp(0) without time zone\n);\nALTER TABLE workers OWNER TO postgres;\nCREATE SEQUENCE workers_id_seq\nSTART WITH 1\nINCREMENT BY 1\nNO MINVALUE\nNO MAXVALUE\nCACHE 1;\n\nALTER TABLE workers_id_seq OWNER TO postgres;\nALTER SEQUENCE workers_id_seq OWNED BY workers.id;\nALTER TABLE ONLY workers ALTER COLUMN id SET DEFAULT nextval('workers_id_seq'::regclass);\nALTER TABLE ONLY workers ADD CONSTRAINT workers_pkey PRIMARY KEY (id);\nCREATE INDEX workers_uid_index ON workers USING btree (uid);",
+          "type": "sql"
+        }
+      ]
+    },
+    "filename": "app/Http/Controllers/sql.php",
+    "groupTitle": "Z_Table_SQL",
+    "name": "SqlLbsWorkers"
   }
 ] });

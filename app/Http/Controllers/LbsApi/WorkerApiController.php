@@ -26,7 +26,7 @@ class WorkerApiController extends Controller
     /**
      * @api {get} /lbs/search-worker 搜索师傅
      * @apiName shaozeming@xiaobaiyoupin.com
-     * @apiDescription 针对师傅位置对师傅进行搜索
+     * @apiDescription 针对位置对附近师傅进行搜索
      * @apiGroup Worker-LBS
      * @apiPermission LBS_TOKEN
      * @apiParam {String}  lbs_token  认证秘钥
@@ -34,12 +34,16 @@ class WorkerApiController extends Controller
      * @apiParam {Decimal} worker_lat 纬度
      * @apiParam {Int} [dist]  搜索范围(米)，默认30000
      * @apiParam {Int} [state]  状态(`0:正常,1:锁定`)，默认0
-     * @apiParam {Int} [limit]  返回条数
-     * @apiSuccess {BigInt}  uid  师傅ID编号
+     * @apiParam {Int} [limit]  返回最多条数
+     * @apiSuccess {BigInt}  id  主键ID
+     * @apiSuccess {BigInt}  uid  关联ID
      * @apiSuccess {String} dist 距离(米)
-     * @apiSuccess {String}  full_address  联系人地址
-     * @apiSuccess {String}  name  联系人姓名
-     * @apiSuccess {String}  mobile  联系人电话
+     * @apiSuccess {String}  full_address  地址
+     * @apiSuccess {String}  name  姓名
+     * @apiSuccess {String}  mobile  电话
+     * @apiSuccess {float}  worker_lat  纬度
+     * @apiSuccess {float}  worker_lng  经度
+     * @apiSuccess {String}  geom  位置几何
      * @apiSuccess {String}  created_at  创建时间
      * @apiSuccess {String}  updated_at  修改时间
      * @apiSuccessExample {json} 成功-Response:
@@ -47,46 +51,37 @@ class WorkerApiController extends Controller
      * "error": 0,
      * "msg": "成功",
      * "data": {
-     * "size": 3,
+     * "size": 2,
      * "list": [
      * {
-     * "id": "4",
-     * "name": "近平先生",
-     * "mobile": "15884565443",
+     * "id": "108004",
+     * "name": "明明",
+     * "mobile": "13332425562",
      * "state": 0,
-     * "full_address": "中关村创业大街123号",
-     * "uid": "67",
-     * "geom": "0101000020E610000060EAE74D45905E40EE42739D469E4640",
-     * "created_at": "2017-03-16 18:58:36",
-     * "updated_at": "2017-03-16 18:58:36",
-     * "st_astext": "POINT(122.25423 45.23653)",
-     * "dist": "1097.49543698"
+     * "worker_lat": "39.33",
+     * "worker_lng": "119.94",
+     * "full_address": "中关村五道口",
+     * "uid": "233334",
+     * "geom": "0101000020E6100000C3B645990DFC5D402D78D15790AA4340",
+     * "created_at": "2017-03-20 18:30:18",
+     * "updated_at": "2017-03-20 18:30:18",
+     * "st_astext": "POINT(119.93833 39.33253)",
+     * "dist": "0"
      * },
      * {
-     * "id": "3",
-     * "name": "雷军",
-     * "mobile": "15444565443",
+     * "id": "1",
+     * "name": "明明",
+     * "mobile": "13332425562",
      * "state": 0,
-     * "full_address": "华清家园",
-     * "uid": "12",
-     * "geom": "0101000020E61000007E6FD39FFD8E5E404451A04FE49D4640",
-     * "created_at": "2017-03-16 18:57:38",
-     * "updated_at": "2017-03-16 18:57:38",
-     * "st_astext": "POINT(122.23423 45.23353)",
-     * "dist": "2121.35513343"
-     * },
-     * {
-     * "id": "2",
-     * "name": "弥勒法",
-     * "mobile": "1333333333",
-     * "state": 0,
-     * "full_address": "少林寺",
-     * "uid": "234",
-     * "geom": "0101000020E61000007E6FD39FFD8E5E407D96E7C1DD9D4640",
-     * "created_at": "2017-03-16 18:56:40",
-     * "updated_at": "2017-03-16 18:56:40",
-     * "st_astext": "POINT(122.23423 45.23333)",
-     * "dist": "2136.42281823"
+     * "worker_lat": "39.33",
+     * "worker_lng": "158.94",
+     * "full_address": "中关村五道口",
+     * "uid": "1",
+     * "geom": "0101000020E6100000C3B645990DFC5D402D78D15790AA4340",
+     * "created_at": "2017-03-17 15:25:05",
+     * "updated_at": "2017-03-20 18:55:56",
+     * "st_astext": "POINT(119.93833 39.33253)",
+     * "dist": "0"
      * }
      * ]
      * }
@@ -98,14 +93,14 @@ class WorkerApiController extends Controller
         Log::info('c=WorkerApiController f=search  options=' . json_encode($options));
         $worker_lng = isset($options['worker_lng']) ? $options['worker_lng'] : 0;
         $worker_lat = isset($options['worker_lat']) ? $options['worker_lat'] : 0;
-        $dist = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE', 300000);
-        $limit = isset($options['limit']) ? (int)$options['limit'] : env('LIMIT', 100);
-        $status = isset($options['state']) ? $options['state'] : 0;
+        $dist = isset($options['dist']) && !empty($options['dist']) ? (int)$options['dist'] : env('DISTANCE', 30000);
+        $limit = isset($options['limit']) && !empty($options['limit']) ? (int)$options['limit'] : env('LIMIT', 100);
+        $status = isset($options['state']) ? (int)$options['state'] : 0;
         if (!$worker_lng || !$worker_lat) {
             Log::info('c=WorkerApiController f=search  msg= 位置数据未输入');
             return $this->response_json(1, "经纬度数据未输入", [], 422);
         }
-        $geom=$worker_lng.' '.$worker_lat;
+        $geom = $worker_lng . ' ' . $worker_lat;
         $lists = $this->apiRepository->selectData($geom, $dist, $status, $limit);
         if ($lists !== false) {
             $out_response = [
@@ -126,12 +121,16 @@ class WorkerApiController extends Controller
      * @apiGroup Worker-LBS
      * @apiPermission LBS_TOKEN
      * @apiParam {String}  lbs_token  认证秘钥
-     * @apiParam {Decimal} worker_lng 经度
-     * @apiParam {Decimal} worker_lat 纬度
-     * @apiParam {BigInt}  uid  师傅ID编号
-     * @apiParam {String}  full_address  联系人地址
+     * @apiParam {BigInt}  uid  关联ID
+     * @apiParam {String} dist 距离(米)
+     * @apiParam {String}  full_address  地址
      * @apiParam {String}  name  姓名
      * @apiParam {String}  mobile  电话
+     * @apiParam {float}  worker_lat  纬度
+     * @apiParam {float}  worker_lng  经度
+     * @apiParam {String}  geom  位置几何
+     * @apiParam {String}  created_at  创建时间
+     * @apiParam {String}  updated_at  修改时间
      * @apiVersion 0.1.0
      * @apiSuccessExample {json} 成功-Response:
      * {
@@ -177,7 +176,7 @@ class WorkerApiController extends Controller
      * @apiGroup Worker-LBS
      * @apiPermission LBS_TOKEN
      * @apiParam {String}  lbs_token  认证秘钥
-     * @apiParam {Bigint}  uid  师傅uid
+     * @apiParam {Bigint}  uid  关联id
      * @apiParam {Int}  state  师傅状态(0:正常，1:锁定)
      * @apiVersion 0.1.0
      * @apiSuccessExample {json} 成功-Response:

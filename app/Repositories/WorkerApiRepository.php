@@ -35,8 +35,13 @@ class WorkerApiRepository extends BaseRepository
 
     public function selectData($point, $dist, $status, $limit)
     {
-
         $sql = $this->getSearchSql($point, $dist, $status, $limit);
+
+
+//        $point = "point($point)";
+//        $distSql = "ST_DistanceSphere(geom,ST_GeomFromText('$point',4326))";
+
+//       return DB::select('select *, ? dist from workers where ? < ? AND state = ? order by ? limit ? ',[$distSql,$distSql,$dist,$status,$distSql,$limit]);
         try {
             $result = DB::select($sql);
         } catch (\Exception $e) {
@@ -60,6 +65,7 @@ class WorkerApiRepository extends BaseRepository
     {
         $sql = $this->getInsertSql($data);
 
+        echo $sql;
         try {
             $result = DB::insert($sql);
         } catch (\Exception $e) {
@@ -137,11 +143,9 @@ class WorkerApiRepository extends BaseRepository
     {
         $strfield = '';
         $strvalue = '';
+        unset($data['lbs_token']);
         $data['geom']=$data['worker_lng'].' '.$data['worker_lat'];
         foreach ($data as $k => $v) {
-            if($k =='worker_lat' || $k="lbs_token"  || $k =='worker_lng') {
-                continue;
-            }
             $strfield .= $k . ',';
             if ($k == 'geom') {
                 $strvalue .= "ST_GeomFromText('POINT(" . addslashes($v) . ")',4326),";
@@ -173,16 +177,13 @@ class WorkerApiRepository extends BaseRepository
         if(isset($data['worker_lng'])&& isset($data['worker_lat'])){
             $data['geom']=$data['worker_lng'].' '.$data['worker_lat'];
         }
+        unset($data['lbs_token']);
         foreach ($data as $k => $v) {
-            if($k =='worker_lat' || $k="lbs_token"  || $k =='worker_lng') {
-                continue;
-            }
             if ($k == 'geom') {
                 $strvalue = "ST_GeomFromText('POINT({$v})',4326)";
             } else {
                 $strvalue = "'" . addslashes($v) . "'";
             }
-
             $set .= $k . '=' . $strvalue . ',';
 
         }

@@ -17,7 +17,6 @@ class CopydataApiController extends Controller
     private $num = 0;
 
 
-
     /**
      * @api {get} /lbs/sync-worker 同步师傅数据
      * @apiDescription 同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中
@@ -26,11 +25,11 @@ class CopydataApiController extends Controller
      * @apiParam {String}  lbs_token  认证秘钥
      * @apiVersion 0.1.0
      * @apiSuccessExample {json} 成功-Response:
-     *  {
-     *   "error": 0,
-     *   "msg": "同步成功",
-     *   "data": []
-     *  }
+     * {
+     * "error": 0,
+     * "msg": "本次共同步了108003条数据，用时:9.46秒",
+     * "data": []
+     * }
      * @apiErrorExample {json} 错误-Response:
      * {
      * "error": 1,
@@ -41,13 +40,13 @@ class CopydataApiController extends Controller
 
     public function sync(Request $request)
     {
-        $options=$request->all();
+        $options = $request->all();
 
-        Log::info('c=CopydataApiController f=sync  msg=' .json_encode($options));
+        Log::info('c=CopydataApiController f=sync  msg=' . json_encode($options));
 
-        if($options)
+        if ($options)
 
-        $starttime = explode(' ', microtime());
+            $starttime = explode(' ', microtime());
 
         $maxUid = $this->getMaxUid();
         $maxId = $this->getMaxId();
@@ -58,16 +57,15 @@ class CopydataApiController extends Controller
             return $this->response_json(0, "当前同步已最新，没有需要同步的数据", []);
         }
 
-        try{
+        try {
             for ($i = 0; $i < ceil($size / $limit); $i++) {
                 $data = $this->getMySqlData($limit, $maxUid);
                 $maxUid += $limit;
                 $this->insertData($data);
             }
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             return $this->response_json(1, "数据导入失败", []);
         }
-
 
 
         $endtime = explode(' ', microtime());
@@ -112,6 +110,7 @@ class CopydataApiController extends Controller
             Log::info('c=CopydataApiController f=getMaxId  msg=' . $e->getMessage());
             return false;
         }
+
         $max = $result[0]->maxid;
         return (int)$max;
     }
@@ -131,7 +130,7 @@ class CopydataApiController extends Controller
         try {
             $data = app('db')
                 ->connection('mysql')
-                ->select("select id as uid ,name,mobile,full_address,worker_lat as x,worker_lng as y,created_at,updated_at from " . config("database.mysql_workers") . " limit {$offset},{$limit}");
+                ->select("select id as uid ,name,mobile,full_address,worker_lat,worker_lng,created_at,updated_at from " . config("database.mysql_workers") . " limit {$offset},{$limit}");
         } catch (\Exception $e) {
             Log::info('c=CopydataApiController f=getMySqlData  msg=' . $e->getMessage());
             return false;
@@ -139,6 +138,13 @@ class CopydataApiController extends Controller
         return $data;
     }
 
+
+    /**
+     * 获取mysql师傅数据.
+     *
+     * @param int $data 导入数据
+     * @return array
+     */
 
     public function insertData($data)
     {
@@ -166,13 +172,10 @@ class CopydataApiController extends Controller
     {
         $sql = '';
         foreach ($data as $v) {
-            $v->geom = $v->x . " " . $v->y;
+            $v->geom = $v->worker_lat . " " . $v->worker_lng;
             $strfield = '';
             $strvalue = '';
             foreach ($v as $k => $vv) {
-                if ($k == 'x' || $k == 'y') {
-                    continue;
-                }
                 $strfield .= $k . ',';
                 if ($k == 'geom') {
                     $strvalue .= "ST_GeomFromText('POINT(" . addslashes($vv) . ")',4326),";
@@ -180,7 +183,6 @@ class CopydataApiController extends Controller
                     $strvalue .= "'" . addslashes($vv) . "',";
                 }
             }
-
             $this->num += 1;
             $strfield = rtrim($strfield, ',');
             $strvalue = rtrim($strvalue, ',');
