@@ -31,10 +31,12 @@ class OrderApiController extends Controller
      * @apiDescription 针对师傅位置对指定范围的可接工单进行搜索
      * @apiGroup Order-LBS
      * @apiPermission LBS_TOKEN
-     * @apiParam {String='(-180.00000,-90.000000) ~ (180.00000,90.000000) '} geom  位置坐标，格式 `"精度，纬度"`
+     * @apiParam {String}  lbs_token  认证秘钥
+     * @apiParam {Decimal} user_lng 经度
+     * @apiParam {Decimal} user_lat 纬度
      * @apiParam {Int} [dist]  搜索范围(米)，默认30000
      * @apiParam {Int} [limit]  返回条数
-     * @apiParam {Int} [order_status]  订单状态(0:待接单，1:已接单，2:已完成，4:已取消)默认为0
+     * @apiParam {Int} [state]  订单状态(0:待接单，1:已接单，2:已完成，4:已取消)默认为0
      * @apiSuccess {BigInt}  order_id  工单ID编号
      * @apiSuccess {String} dist 距离(米)
      * @apiSuccess {String}  full_address  联系人地址
@@ -120,14 +122,16 @@ class OrderApiController extends Controller
 
         $options = $this->request->all();
         Log::info('c=OrderApiController f=search  options=' . json_encode($options));
-        $geom = isset($options['geom']) ? $options['geom'] : '';
+        $user_lng = isset($options['user_lng']) ? $options['user_lng'] : 0;
+        $user_lat = isset($options['user_lat']) ? $options['user_lat'] : 0;
         $dist = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE', 30000);
         $limit = isset($options['limit']) ? (int)$options['limit'] : env('LIMIT', 1000);
         $status = isset($options['state']) ? $options['state'] : 0;
-        if (empty($geom)) {
-            Log::info('c=OrderApiController f=search  msg= 位置数据未知');
-            return $this->response_json(1, "位置数据未知", [], 422);
+        if (!$user_lng || !$user_lat) {
+            Log::info('c=OrderApiController f=search  msg= 位置数据未输入');
+            return $this->response_json(1, "经纬度数据未输入", [], 422);
         }
+        $geom=$user_lng.' '.$user_lat;
         $lists = $this->apiRepository->selectData($geom, $dist, $status, $limit);
         if ($lists !== false) {
             $out_response = [
@@ -147,7 +151,9 @@ class OrderApiController extends Controller
      * @apiDescription 添加工单(create post)
      * @apiGroup Order-LBS
      * @apiPermission LBS_TOKEN
-     * @apiParam {String='(-180.00000,-90.000000) ~ (180.00000,90.000000) '} geom 位置坐标，格式 `"精度，纬度"`
+     * @apiParam {String}  lbs_token  认证秘钥
+     * @apiParam {Decimal} user_lng 经度
+     * @apiParam {Decimal} user_lat 纬度
      * @apiParam {BigInt}  order_id  工单ID编号
      * @apiParam {String}  full_address  联系人地址
      * @apiParam {String}  user_name  联系人姓名
@@ -185,7 +191,6 @@ class OrderApiController extends Controller
             return $this->response_msg($e->getResponse());
         }
 
-        //1.距离范围，2.地理位置
         $data = $this->request->all();
         Log::info('c=OrderApiController f=insert  options=' . json_encode($data));
 
@@ -201,18 +206,10 @@ class OrderApiController extends Controller
      * @api {post} /lbs/save-order 修改工单
      * @apiDescription 修改工单信息
      * @apiGroup Order-LBS
-     * @apiPermission none
-     * @apiParam {String}  order_id  工单编号
-     * @apiParam {Int}  [state]  工单状态(0:未接单，1:已接单，2:已完成，3:已取消)
-     * @apiParam {String}  [full_address]  联系人地址
-     * @apiParam {String}  [user_name]  联系人姓名
-     * @apiParam {String}  [user_mobile]  联系人电话
-     * @apiParam {String}  [merchant_name]  厂商名称
-     * @apiParam {String}  [merchant_telphone]  厂商联系方式
-     * @apiParam {String}  [description]  工单描述
-     * @apiParam {BigInt}  [category_id]  分类id
-     * @apiParam {String}  [category_name]  分类名称
-     * @apiParam {String='(-180.00000,-90.000000) ~ (180.00000,90.000000) '} [geom]  位置坐标，格式 `"精度，纬度"`
+     * @apiPermission LBS_TOKEN
+     * @apiParam {String}  lbs_token  认证秘钥
+     * @apiParam {Bigint}  order_id  工单编号
+     * @apiParam {Int}  state  工单状态(0:未接单，1:已接单，2:已完成，3:已取消)
      * @apiVersion 0.1.0
      * @apiSuccessExample {json} 响应例子:
      * {
@@ -243,7 +240,7 @@ class OrderApiController extends Controller
         }
         $options = $this->request->all();
         Log::info('c=OrderApiController f=save  options=' . json_encode($options));
-        $order_num = isset($options['order_num']) ? $options['order_num'] : 0;
+        $order_num = isset($options['order_id']) ? $options['order_id'] : 0;
 
         $result = $this->apiRepository->saveData($options, $order_num);
 

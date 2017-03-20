@@ -36,11 +36,11 @@ class AuthServiceProvider extends ServiceProvider
             }
 
 
-            return true;
-//            if ($request->input('lbs_token')) {
-//
-//                    return ($request->input('lbs_token')== env('LBS_TOKEN'))?1:null;
-//            }
+//            return true;
+            if ($request->input('lbs_token')) {
+
+                    return ($request->input('lbs_token')== env('LBS_TOKEN'))?1:null;
+            }
 
         });
     }

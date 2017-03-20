@@ -39,25 +39,18 @@ $app->group(['prefix' => 'lbs', 'namespace' => 'LbsApi','middleware' => 'auth'],
     ]);
 
     //导入数据路由
-
     $app->get('sync-worker', [
         'as' => 'syncWorker', 'uses' => 'CopydataApiController@sync'
     ]);
 
-    $app->get('insert-worker', [
-        'as' => 'syncWorker', 'uses' => 'CopydataApiController@insert'
-    ]);
+//    $app->get('test-worker', [
+//        'as' => 'syncWorker', 'uses' => 'CopydataApiController@insert'
+//    ]);
 
 });
 
-//['namespace' => 'Api']
-$app->get('/', function () use ($app) {
 
-    return md5(uniqid());
-    });
+//$app->get('/', function () use ($app) {
 //
-//$app->group(['prefix' => 'admin'], function () use ($app) {
-//    $app->get('users', function ()    {
-//        // Matches The "/admin/users" URL
+//    return md5(uniqid());
 //    });
-//});

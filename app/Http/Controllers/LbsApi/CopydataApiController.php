@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\LbsApi;
 
+use App\Exceptions\MyException;
 use App\Http\Controllers\Controller;
 use App\Repositories\WorkerApiRepository;
 use App\Validators\WorkerValidator;
@@ -16,50 +17,24 @@ class CopydataApiController extends Controller
     private $num = 0;
 
 
-    //
+
     /**
-     * @api {post} /lbs/save-worker 同步师傅数据
+     * @api {get} /lbs/sync-worker 同步师傅数据
      * @apiDescription 同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中
-     * @apiGroup Worker-LBS
-     * @apiPermission none
-     * @apiParam {String}  uid  师傅uid
-     * @apiParam {Int}  [state]  师傅状态(0:未接单，1:已接单，2:已完成，3:已取消)
-     * @apiParam {String}  [full_address]  师傅地址
-     * @apiParam {String}  [user_name]  师傅姓名
+     * @apiGroup LBS-Sync
+     * @apiPermission LBS_TOKEN
+     * @apiParam {String}  lbs_token  认证秘钥
      * @apiVersion 0.1.0
      * @apiSuccessExample {json} 成功-Response:
      *  {
      *   "error": 0,
-     *   "msg": "修改成功",
+     *   "msg": "同步成功",
      *   "data": []
      *  }
      * @apiErrorExample {json} 错误-Response:
      * {
      * "error": 1,
-     * "msg": "验证错误：未输入师傅关联id(uid),",
-     * "data": []
-     * }
-     */
-
-
-    /**
-     * @api {post} /lbs/save-worker 同步师傅数据
-     * @apiDescription 同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中
-     * @apiGroup Worker-LBS
-     * @apiPermission none
-     * @apiParam {String}  uid  师傅uid
-     * @apiParam {Int}  [state]  师傅状态(0:未接单，1:已接单，2:已完成，3:已取消)
-     * @apiVersion 0.2.0
-     * @apiSuccessExample {json} 成功-Response:
-     *  {
-     *   "error": 0,
-     *   "msg": "修改成功",
-     *   "data": []
-     *  }
-     * @apiErrorExample {json} 错误-Response:
-     * {
-     * "error": 1,
-     * "msg": "验证错误：未输入师傅关联id(uid),",
+     * "msg": "导入失败",
      * "data": []
      * }
      */
@@ -220,52 +195,29 @@ class CopydataApiController extends Controller
     }
 
 
-    /**
-     * @api {post} /lbs/insert-worker 添加师傅
-     * @apiDescription 添加师傅位置信息
-     * @apiGroup Worker-LBS
-     * @apiPermission LBS_TOKEN
-     * @apiParam {String='(-180.00000,-90.000000) ~ (180.00000,90.000000) '} geom 位置坐标，格式 `"精度，纬度"`
-     * @apiParam {BigInt}  uid  师傅ID编号
-     * @apiParam {String}  full_address  联系人地址
-     * @apiParam {String}  name  姓名
-     * @apiParam {String}  mobile  电话
-     * @apiVersion 0.1.0
-     * @apiSuccessExample {json} 成功-Response:
-     * {
-     * "error": 0,
-     * "msg": "添加成功",
-     * "data": []
-     * }
-     *
-     * @apiErrorExample {json} 错误-Response:
-     * {
-     * "error": 1,
-     * "msg": "验证错误：该uid关联师傅已存在(uid),",
-     * "data": []
-     * }
-     */
-    public function insert()
-    {
-        $i = 1;
-        $ii = 0;
-        $sql = '';
-        while ($i < 10000) {
-            $x = (0.5 - mt_rand(0, 100000) / 100000) * 180;
-            $p = mt_rand(0, 10000000000) * 8;
 
-            $y = (0.5 - mt_rand(0, 100000) / 100000) * 90;
-            $sql .= "(\"高渐离\",\"{$p}\",\"易水寒\",1,23,\"墨家机关城68号\",{$x},{$y}),";
-
-            $i++;
-        }
-
-        $sql = "INSERT INTO `lsd_workers`(`name`, `mobile`, `nickname`, `sex`, `age`, `full_address`, `worker_lat`, `worker_lng`) VALUES " . $sql;
-        $sql = rtrim($sql, ',');
+    //添加数据导入测试师傅数据
+//    public function insert()
+//    {
+//        $i = 1;
+//        $ii = 0;
+//        $sql = '';
+//        while ($i < 10000) {
+//            $x = (0.5 - mt_rand(0, 100000) / 100000) * 180;
+//            $p = mt_rand(0, 10000000000) * 8;
+//
+//            $y = (0.5 - mt_rand(0, 100000) / 100000) * 90;
+//            $sql .= "(\"高渐离\",\"{$p}\",\"易水寒\",1,23,\"墨家机关城68号\",{$x},{$y}),";
+//
+//            $i++;
+//        }
+//
+//        $sql = "INSERT INTO `lsd_workers`(`name`, `mobile`, `nickname`, `sex`, `age`, `full_address`, `worker_lat`, `worker_lng`) VALUES " . $sql;
+//        $sql = rtrim($sql, ',');
 //        $users = DB::connection('mysql')->insert($sql);
 //        echo $users;
 
-    }
+//    }
 
 
 }

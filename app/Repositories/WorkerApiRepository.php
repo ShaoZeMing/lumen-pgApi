@@ -106,6 +106,7 @@ class WorkerApiRepository extends BaseRepository
     protected function getSearchSql($point, $dist, $status, $limit)
     {
 
+
         $point = "point($point)";
         $distSql = "ST_DistanceSphere(geom,ST_GeomFromText('$point',4326))";
 
@@ -136,7 +137,11 @@ class WorkerApiRepository extends BaseRepository
     {
         $strfield = '';
         $strvalue = '';
+        $data['geom']=$data['worker_lng'].' '.$data['worker_lat'];
         foreach ($data as $k => $v) {
+            if($k =='worker_lat' || $k="lbs_token"  || $k =='worker_lng') {
+                continue;
+            }
             $strfield .= $k . ',';
             if ($k == 'geom') {
                 $strvalue .= "ST_GeomFromText('POINT(" . addslashes($v) . ")',4326),";
@@ -165,7 +170,13 @@ class WorkerApiRepository extends BaseRepository
     protected function getSaveSql($data, $uid)
     {
         $set = '';
+        if(isset($data['worker_lng'])&& isset($data['worker_lat'])){
+            $data['geom']=$data['worker_lng'].' '.$data['worker_lat'];
+        }
         foreach ($data as $k => $v) {
+            if($k =='worker_lat' || $k="lbs_token"  || $k =='worker_lng') {
+                continue;
+            }
             if ($k == 'geom') {
                 $strvalue = "ST_GeomFromText('POINT({$v})',4326)";
             } else {

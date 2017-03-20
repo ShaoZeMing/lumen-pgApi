@@ -36,7 +36,11 @@ class Authenticate
     public function handle($request, Closure $next, $guard = null)
     {
         if ($this->auth->guard($guard)->guest()) {
-            return response('Unauthorized.', 401);
+            return response()->json([
+                'error' => 1,
+                'msg' => "没有权限，请确认是否传入有效的lbs_token！",
+                'data' => [],
+            ], 401);
         }
 
         return $next($request);

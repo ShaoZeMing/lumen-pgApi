@@ -13,7 +13,8 @@ class WorkerValidator extends Validator
             'name' => 'required',
             'mobile' => 'required',
             'full_address' => 'required',
-            'geom' => 'required',
+            'worker_lng' => 'required',
+            'worker_lat' => 'required',
         ],
         Validator::RULE_UPDATE => [
             'uid' => 'required',
@@ -26,7 +27,8 @@ class WorkerValidator extends Validator
         'name.required' => '师傅名称参数无！',
         'mobile.required' => '师傅联系电话参数必需！',
         'full_address.required' => '未获得师傅联系地址！',
-        'geom.required' => '未获得师傅联系地址经纬度！',
+        'worker_lng.required' => '未获得师傅联系地址经度！',
+        'worker_lat.required' => '未获得师傅联系地址纬度！',
 
     ];
 

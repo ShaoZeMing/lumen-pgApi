@@ -15,7 +15,8 @@ class OrderValidator extends Validator
             'user_name' => 'required',
             'user_mobile' => 'required',
             'full_address' => 'required',
-            'geom' => 'required',
+            'user_lng' => 'required',
+            'user_lat' => 'required',
         ],
         Validator::RULE_UPDATE => [
             'order_id' => 'required',
@@ -30,7 +31,8 @@ class OrderValidator extends Validator
         'user_mobile.required' => '未获得联系人联系电话！',
         'merchant_telphone.required' => '未获得商家联系电话！',
         'full_address.required' => '未获得详细联系地址！',
-        'geom.required' => '未获得联系地址经纬度！',
+        'user_lng.required' => '未获得师傅联系地址经度！',
+        'user_lat.required' => '未获得师傅联系地址纬度！',
     ];
 
 

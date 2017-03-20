@@ -82,7 +82,7 @@ class OrderApiRepository extends BaseRepository
     public function saveData($data, $o_id)
     {
         $sql = $this->getSaveSql($data, $o_id);
-//        echo $sql;
+        echo $sql;
         try {
             $result = DB::update($sql);
         } catch (\Exception $e) {
@@ -135,8 +135,12 @@ class OrderApiRepository extends BaseRepository
     {
         $strfield = '';
         $strvalue = '';
+        $data['geom']=$data['user_lng'].' '.$data['user_lat'];
         foreach ($data as $k => $v) {
-            $strfield .= $k . ',';
+            if($k =='user_lat'|| $k=="lbs_token" || $k =='user_lng') {
+                continue;
+            }
+            $strfield .= $k.',';
             if ($k == 'geom') {
                 $strvalue .= "ST_GeomFromText('POINT(" . addslashes($v) . ")',4326),";
             } else {
@@ -164,19 +168,26 @@ class OrderApiRepository extends BaseRepository
     protected function getSaveSql($data, $order_id)
     {
         $set = '';
+        if(isset($data['user_lng'])&& isset($data['user_lat'])){
+            $data['geom']=$data['user_lng'].' '.$data['user_lat'];
+        }
         foreach ($data as $k => $v) {
+            if($k =='user_lat'|| $k=="lbs_token" || $k =='user_lng') {
+                continue;
+            }
             if ($k == 'geom') {
-                $strvalue = "ST_GeomFromText('POINT({$v})',4326)";
+                $strvalue = "ST_GeomFromText('POINT(".addslashes($v).")',4326)";
             } else {
                 $strvalue = "'" . addslashes($v) . "'";
             }
-
             $set .= $k . '=' . $strvalue . ',';
 
         }
         $strfield = rtrim($set, ',');
 
         return "UPDATE orders SET {$strfield},updated_at = now() WHERE order_id = '" . $order_id . "'";
+
+
 
     }
 

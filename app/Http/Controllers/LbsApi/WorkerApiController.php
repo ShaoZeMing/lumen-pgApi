@@ -29,8 +29,11 @@ class WorkerApiController extends Controller
      * @apiDescription 针对师傅位置对师傅进行搜索
      * @apiGroup Worker-LBS
      * @apiPermission LBS_TOKEN
-     * @apiParam {String='(-180.00000,-90.000000) ~ (180.00000,90.000000) '} geom  位置坐标，格式 `"精度，纬度"`
+     * @apiParam {String}  lbs_token  认证秘钥
+     * @apiParam {Decimal} worker_lng 经度
+     * @apiParam {Decimal} worker_lat 纬度
      * @apiParam {Int} [dist]  搜索范围(米)，默认30000
+     * @apiParam {Int} [state]  状态(`0:正常,1:锁定`)，默认0
      * @apiParam {Int} [limit]  返回条数
      * @apiSuccess {BigInt}  uid  师傅ID编号
      * @apiSuccess {String} dist 距离(米)
@@ -93,14 +96,16 @@ class WorkerApiController extends Controller
     {
         $options = $this->request->all();
         Log::info('c=WorkerApiController f=search  options=' . json_encode($options));
-        $geom = isset($options['geom']) ? $options['geom'] : '';
-        $dist = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE', 30000);
-        $limit = isset($options['limit']) ? (int)$options['limit'] : env('LIMIT', 1000);
+        $worker_lng = isset($options['worker_lng']) ? $options['worker_lng'] : 0;
+        $worker_lat = isset($options['worker_lat']) ? $options['worker_lat'] : 0;
+        $dist = isset($options['dist']) ? (int)$options['dist'] : env('DISTANCE', 300000);
+        $limit = isset($options['limit']) ? (int)$options['limit'] : env('LIMIT', 100);
         $status = isset($options['state']) ? $options['state'] : 0;
-        if (empty($geom)) {
+        if (!$worker_lng || !$worker_lat) {
             Log::info('c=WorkerApiController f=search  msg= 位置数据未输入');
-            return $this->response_json(1, "位置数据未输入", [], 422);
+            return $this->response_json(1, "经纬度数据未输入", [], 422);
         }
+        $geom=$worker_lng.' '.$worker_lat;
         $lists = $this->apiRepository->selectData($geom, $dist, $status, $limit);
         if ($lists !== false) {
             $out_response = [
@@ -120,7 +125,9 @@ class WorkerApiController extends Controller
      * @apiDescription 添加师傅位置信息
      * @apiGroup Worker-LBS
      * @apiPermission LBS_TOKEN
-     * @apiParam {String='(-180.00000,-90.000000) ~ (180.00000,90.000000) '} geom 位置坐标，格式 `"精度，纬度"`
+     * @apiParam {String}  lbs_token  认证秘钥
+     * @apiParam {Decimal} worker_lng 经度
+     * @apiParam {Decimal} worker_lat 纬度
      * @apiParam {BigInt}  uid  师傅ID编号
      * @apiParam {String}  full_address  联系人地址
      * @apiParam {String}  name  姓名
@@ -165,16 +172,13 @@ class WorkerApiController extends Controller
     }
 
     /**
-     * @api {post} /lbs/save-worker 修改师傅
+     * @api {post} /lbs/save-worker 修改师傅状态
      * @apiDescription 修改师傅信息
      * @apiGroup Worker-LBS
-     * @apiPermission none
-     * @apiParam {String}  uid  师傅uid
-     * @apiParam {Int}  [state]  师傅状态(0:未接单，1:已接单，2:已完成，3:已取消)
-     * @apiParam {String}  [full_address]  师傅地址
-     * @apiParam {String}  [user_name]  师傅姓名
-     * @apiParam {String}  [mobile]  师傅电话
-     * @apiParam {String='(-180.00000,-90.000000) ~ (180.00000,90.000000) '} [geom]  位置坐标，格式 `"精度，纬度"`
+     * @apiPermission LBS_TOKEN
+     * @apiParam {String}  lbs_token  认证秘钥
+     * @apiParam {Bigint}  uid  师傅uid
+     * @apiParam {Int}  state  师傅状态(0:正常，1:锁定)
      * @apiVersion 0.1.0
      * @apiSuccessExample {json} 成功-Response:
      *  {

@@ -1,5 +1,52 @@
 define({ "api": [
   {
+    "type": "get",
+    "url": "/lbs/sync-worker",
+    "title": "同步师傅数据",
+    "description": "<p>同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中</p>",
+    "group": "LBS_Sync",
+    "permission": [
+      {
+        "name": "LBS_TOKEN"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "lbs_token",
+            "description": "<p>认证秘钥</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.1.0",
+    "success": {
+      "examples": [
+        {
+          "title": "成功-Response:",
+          "content": "{\n \"error\": 0,\n \"msg\": \"同步成功\",\n \"data\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "错误-Response:",
+          "content": "{\n\"error\": 1,\n\"msg\": \"导入失败\",\n\"data\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/Http/Controllers/LbsApi/CopydataApiController.php",
+    "groupTitle": "LBS_Sync",
+    "name": "GetLbsSyncWorker"
+  },
+  {
     "type": "post",
     "url": "/lbs/insert-order",
     "title": "添加工单",
@@ -16,12 +63,23 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "allowedValues": [
-              "'(-180.00000,-90.000000) ~ (180.00000,90.000000) '"
-            ],
             "optional": false,
-            "field": "geom",
-            "description": "<p>位置坐标，格式 <code>&quot;精度，纬度&quot;</code></p>"
+            "field": "lbs_token",
+            "description": "<p>认证秘钥</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "user_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "user_lat",
+            "description": "<p>纬度</p>"
           },
           {
             "group": "Parameter",
@@ -120,7 +178,7 @@ define({ "api": [
     "group": "Order_LBS",
     "permission": [
       {
-        "name": "none"
+        "name": "LBS_TOKEN"
       }
     ],
     "parameter": {
@@ -130,81 +188,22 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
+            "field": "lbs_token",
+            "description": "<p>认证秘钥</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Bigint",
+            "optional": false,
             "field": "order_id",
             "description": "<p>工单编号</p>"
           },
           {
             "group": "Parameter",
             "type": "Int",
-            "optional": true,
+            "optional": false,
             "field": "state",
             "description": "<p>工单状态(0:未接单，1:已接单，2:已完成，3:已取消)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "full_address",
-            "description": "<p>联系人地址</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "user_name",
-            "description": "<p>联系人姓名</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "user_mobile",
-            "description": "<p>联系人电话</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "merchant_name",
-            "description": "<p>厂商名称</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "merchant_telphone",
-            "description": "<p>厂商联系方式</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "description",
-            "description": "<p>工单描述</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "BigInt",
-            "optional": true,
-            "field": "category_id",
-            "description": "<p>分类id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "category_name",
-            "description": "<p>分类名称</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "allowedValues": [
-              "'(-180.00000,-90.000000) ~ (180.00000,90.000000) '"
-            ],
-            "optional": true,
-            "field": "geom",
-            "description": "<p>位置坐标，格式 <code>&quot;精度，纬度&quot;</code></p>"
           }
         ]
       }
@@ -250,12 +249,23 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "allowedValues": [
-              "'(-180.00000,-90.000000) ~ (180.00000,90.000000) '"
-            ],
             "optional": false,
-            "field": "geom",
-            "description": "<p>位置坐标，格式 <code>&quot;精度，纬度&quot;</code></p>"
+            "field": "lbs_token",
+            "description": "<p>认证秘钥</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "user_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "user_lat",
+            "description": "<p>纬度</p>"
           },
           {
             "group": "Parameter",
@@ -275,7 +285,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "Int",
             "optional": true,
-            "field": "order_status",
+            "field": "state",
             "description": "<p>订单状态(0:待接单，1:已接单，2:已完成，4:已取消)默认为0</p>"
           }
         ]
@@ -392,8 +402,8 @@ define({ "api": [
     "groupTitle": "Order_LBS"
   },
   {
-    "type": "post",
-    "url": "/lbs/xxx-order",
+    "type": "sql",
+    "url": "/lbs/orders",
     "title": "工单表",
     "description": "<p>定位工单表字段</p>",
     "group": "Table_SQL",
@@ -412,91 +422,91 @@ define({ "api": [
             "type": "smallint",
             "optional": false,
             "field": "state",
-            "description": "<p>工单状态(0:未接单<code>默认</code>，1:已接单，2:已完成，3:已取消)</p>"
+            "description": "<p>工单状态(0:未接单，1:已接), 默认值：<code>0</code></p>"
           },
           {
             "group": "Parameter",
             "type": "bigint",
             "optional": false,
             "field": "order_id",
-            "description": "<p>工单关联id</p>"
+            "description": "<p>工单关联id, 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "varchar(128)",
             "optional": false,
             "field": "full_address",
-            "description": "<p>联系人地址</p>"
+            "description": "<p>联系人地址, 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "varchar(16)",
             "optional": false,
             "field": "user_name",
-            "description": "<p>联系人姓名</p>"
+            "description": "<p>联系人姓名, 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "char(12)",
             "optional": false,
             "field": "user_mobile",
-            "description": "<p>联系人电话</p>"
+            "description": "<p>联系人电话, 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "varchar(64)",
             "optional": false,
             "field": "merchant_name",
-            "description": "<p>厂商名称</p>"
+            "description": "<p>厂商名称, 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "char(12)",
             "optional": false,
             "field": "merchant_telphone",
-            "description": "<p>厂商联系方式</p>"
+            "description": "<p>厂商联系方式, 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "text",
             "optional": false,
             "field": "description",
-            "description": "<p>工单描述</p>"
+            "description": "<p>工单描述, 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "bigint",
             "optional": false,
             "field": "category_id",
-            "description": "<p>分类id</p>"
+            "description": "<p>分类id, 默认值：<code>0</code></p>"
           },
           {
             "group": "Parameter",
             "type": "varchar",
             "optional": false,
             "field": "category_name",
-            "description": "<p>分类名称</p>"
+            "description": "<p>分类名称, 默认值：<code>&quot;&quot;</code></p>"
           },
           {
             "group": "Parameter",
             "type": "geometry(Point)",
             "optional": false,
             "field": "geom",
-            "description": "<p>位置坐标(注：字段类型为<code>geometry(Point,4326)</code>)</p>"
+            "description": "<p>位置坐标(注：字段类型为<code>geometry(Point,4326)</code>), 默认值：<code>NOT NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "timestamp",
             "optional": false,
             "field": "created_at",
-            "description": "<p>创建时间`</p>"
+            "description": "<p>创建时间, 默认值：<code>NULL</code></p>"
           },
           {
             "group": "Parameter",
             "type": "timestamp",
             "optional": false,
             "field": "updated_at",
-            "description": "<p>修改时间</p>"
+            "description": "<p>修改时间, 默认值：<code>NULL</code></p>"
           }
         ]
       }
@@ -513,11 +523,11 @@ define({ "api": [
     },
     "filename": "app/Http/Controllers/sql.php",
     "groupTitle": "Table_SQL",
-    "name": "PostLbsXxxOrder"
+    "name": "SqlLbsOrders"
   },
   {
-    "type": "post",
-    "url": "/lbs/xxxx-order",
+    "type": "sql",
+    "url": "/lbs/workers",
     "title": "师傅表",
     "description": "<p>定位师傅表字段</p>",
     "group": "Table_SQL",
@@ -536,56 +546,56 @@ define({ "api": [
             "type": "varchar(100)",
             "optional": false,
             "field": "name",
-            "description": "<p>姓名</p>"
+            "description": "<p>姓名：(<code>NOT NULL</code>)</p>"
           },
           {
             "group": "Parameter",
             "type": "char(12)",
             "optional": false,
             "field": "mobile",
-            "description": "<p>姓名</p>"
+            "description": "<p>电话：(<code>NOT NULL</code>)</p>"
           },
           {
             "group": "Parameter",
             "type": "text",
             "optional": false,
             "field": "full_address",
-            "description": "<p>地址</p>"
+            "description": "<p>地址：(<code>NOT NULL</code>)</p>"
           },
           {
             "group": "Parameter",
             "type": "bigint",
             "optional": false,
             "field": "uid",
-            "description": "<p>关联ID</p>"
+            "description": "<p>关联ID：(<code>NOT NULL</code>)</p>"
           },
           {
             "group": "Parameter",
             "type": "geometry(Point)",
             "optional": false,
             "field": "geom",
-            "description": "<p>地址(注：字段类型为<code>geometry(Point,4326)</code>)</p>"
+            "description": "<p>地址(注：字段类型为<code>geometry(Point,4326)</code>)：(<code>NOT NULL</code>)</p>"
           },
           {
             "group": "Parameter",
             "type": "smallint",
             "optional": false,
             "field": "state",
-            "description": "<p>工单状态(0:未接单<code>默认</code>，1:已接单，2:已完成，3:已取消)</p>"
+            "description": "<p>工单状态(0:正常<code>默认</code>，1:锁定)</p>"
           },
           {
             "group": "Parameter",
             "type": "timestamp",
             "optional": false,
             "field": "created_at",
-            "description": "<p>创建时间`</p>"
+            "description": "<p>创建时间：(<code>NULL</code>)</p>"
           },
           {
             "group": "Parameter",
             "type": "timestamp",
             "optional": false,
             "field": "updated_at",
-            "description": "<p>修改时间</p>"
+            "description": "<p>修改时间：(<code>NULL</code>)</p>"
           }
         ]
       }
@@ -602,7 +612,7 @@ define({ "api": [
     },
     "filename": "app/Http/Controllers/sql.php",
     "groupTitle": "Table_SQL",
-    "name": "PostLbsXxxxOrder"
+    "name": "SqlLbsWorkers"
   },
   {
     "type": "post",
@@ -621,12 +631,23 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "allowedValues": [
-              "'(-180.00000,-90.000000) ~ (180.00000,90.000000) '"
-            ],
             "optional": false,
-            "field": "geom",
-            "description": "<p>位置坐标，格式 <code>&quot;精度，纬度&quot;</code></p>"
+            "field": "lbs_token",
+            "description": "<p>认证秘钥</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "worker_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "worker_lat",
+            "description": "<p>纬度</p>"
           },
           {
             "group": "Parameter",
@@ -685,12 +706,12 @@ define({ "api": [
   {
     "type": "post",
     "url": "/lbs/save-worker",
-    "title": "修改师傅",
+    "title": "修改师傅状态",
     "description": "<p>修改师傅信息</p>",
     "group": "Worker_LBS",
     "permission": [
       {
-        "name": "none"
+        "name": "LBS_TOKEN"
       }
     ],
     "parameter": {
@@ -700,46 +721,22 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
+            "field": "lbs_token",
+            "description": "<p>认证秘钥</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Bigint",
+            "optional": false,
             "field": "uid",
             "description": "<p>师傅uid</p>"
           },
           {
             "group": "Parameter",
             "type": "Int",
-            "optional": true,
+            "optional": false,
             "field": "state",
-            "description": "<p>师傅状态(0:未接单，1:已接单，2:已完成，3:已取消)</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "full_address",
-            "description": "<p>师傅地址</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "user_name",
-            "description": "<p>师傅姓名</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": true,
-            "field": "mobile",
-            "description": "<p>师傅电话</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "allowedValues": [
-              "'(-180.00000,-90.000000) ~ (180.00000,90.000000) '"
-            ],
-            "optional": true,
-            "field": "geom",
-            "description": "<p>位置坐标，格式 <code>&quot;精度，纬度&quot;</code></p>"
+            "description": "<p>师傅状态(0:正常，1:锁定)</p>"
           }
         ]
       }
@@ -785,12 +782,23 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "String",
-            "allowedValues": [
-              "'(-180.00000,-90.000000) ~ (180.00000,90.000000) '"
-            ],
             "optional": false,
-            "field": "geom",
-            "description": "<p>位置坐标，格式 <code>&quot;精度，纬度&quot;</code></p>"
+            "field": "lbs_token",
+            "description": "<p>认证秘钥</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "worker_lng",
+            "description": "<p>经度</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Decimal",
+            "optional": false,
+            "field": "worker_lat",
+            "description": "<p>纬度</p>"
           },
           {
             "group": "Parameter",
@@ -798,6 +806,13 @@ define({ "api": [
             "optional": true,
             "field": "dist",
             "description": "<p>搜索范围(米)，默认30000</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Int",
+            "optional": true,
+            "field": "state",
+            "description": "<p>状态(<code>0:正常,1:锁定</code>)，默认0</p>"
           },
           {
             "group": "Parameter",
