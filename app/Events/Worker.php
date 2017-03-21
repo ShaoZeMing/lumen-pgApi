@@ -5,6 +5,7 @@ namespace App\Events;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
+use Phaza\LaravelPostgis\Geometries\Point;
 
 class Worker extends Model
 {
@@ -25,7 +26,7 @@ class Worker extends Model
     ];
 
     protected $postgisFields = [
-        'geom',
+        'geom '=> Point::class,
     ];
 
 

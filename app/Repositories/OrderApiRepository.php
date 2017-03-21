@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Events\Order;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Phaza\LaravelPostgis\Geometries\GeomPoint;
 
 class OrderApiRepository extends BaseRepository
 {
@@ -58,20 +59,38 @@ class OrderApiRepository extends BaseRepository
 
     public function insertData($data)
     {
-        $sql = $this->getInsertSql($data);
 
         try {
-            $result = DB::insert($sql);
+            $location1 = new Order();
+            $location1->order_no = $data['order_no'];
+            $location1->order_desc = $data['order_desc'];
+            $location1->full_address = $data['full_address'];
+            $location1->user_id = $data['user_id'];
+            $location1->user_name = $data['user_name'];
+            $location1->user_mobile = $data['user_mobile'];
+            $location1->merchant_id = $data['merchant_id'];
+            $location1->merchant_name = $data['merchant_name'];
+            $location1->merchant_tel = $data['merchant_tel'];
+            $location1->published_at = $data['published_at'];
+            $location1->user_lat = $data['user_lat'];
+            $location1->user_lng = $data['user_lng'];
+            $location1->geom = new GeomPoint($data['user_lng'], $data['user_lat']);
+            $location1->big_cat = isset($data['big_cat']) ? $data['big_cat'] : '';
+            $location1->middle_cat = isset($data['middle_cat']) ? $data['middle_cat'] : '';
+            $location1->small_cat = isset($data['small_cat']) ? $data['small_cat'] : '';
+            $location1->order_type = isset($data['order_type']) ? $data['order_type'] :0;
+            $location1->biz_type = isset($data['biz_type']) ? $data['biz_type'] : 0;
+            $location1->save();
         } catch (\Exception $e) {
             Log::info('c=OrderApiRepository f=insertData  msg=' . $e->getMessage());
             return false;
         }
-        return $result;
+        return $location1->getQueueableId();
 
     }
 
     /**
-     * 修改师傅.
+     * 修改工单.
      *
      * @param string $filePath
      * @param array $data 修改数据
@@ -79,17 +98,36 @@ class OrderApiRepository extends BaseRepository
      * @return bool
      */
 
-    public function saveData($data, $order_no)
+    public function saveData($data)
     {
-        $sql = $this->getSaveSql($data, $order_no);
-//        dd( $sql);
+
         try {
-            $result = DB::update($sql);
+            $location1 = Order::where('order_no', $data['order_no'])->first();;
+            $location1->state = isset($data['state']) ? $data['state'] : $location1->state;
+            $location1->order_desc = isset($data['order_desc']) ? $data['order_desc'] : $location1->order_desc;
+            $location1->full_address = isset($data['full_address']) ? $data['full_address'] : $location1->full_address;
+            $location1->user_id = isset($data['user_id']) ? $data['user_id'] : $location1->user_id;
+            $location1->user_name = isset($data['user_name']) ? $data['user_name'] : $location1->user_name;
+            $location1->user_mobile = isset($data['user_mobile']) ? $data['user_mobile'] : $location1->user_mobile;
+            $location1->merchant_id = isset($data['merchant_id']) ? $data['merchant_id'] : $location1->merchant_id;
+            $location1->merchant_name = isset($data['merchant_name']) ? $data['merchant_name'] : $location1->merchant_name;
+            $location1->merchant_tel = isset($data['merchant_tel']) ? $data['merchant_tel'] : $location1->merchant_tel;
+            $location1->published_at = isset($data['published_at']) ? $data['published_at'] : $location1->published_at;
+            $location1->user_lat = isset($data['user_lat']) ? $data['user_lat'] : $location1->user_lat;
+            $location1->user_lng = isset($data['user_lng']) ? $data['user_lng'] : $location1->user_lng;
+            $location1->big_cat = isset($data['big_cat']) ? $data['big_cat'] : $location1->big_cat;
+            $location1->middle_cat = isset($data['middle_cat']) ? $data['middle_cat'] : $location1->middle_cat;
+            $location1->small_cat = isset($data['small_cat']) ? $data['small_cat'] : $location1->small_cat;
+            $location1->order_type = isset($data['order_type']) ? $data['order_type'] : $location1->order_type;
+            $location1->biz_type = isset($data['biz_type']) ? $data['biz_type'] : $location1->biz_type;
+            $location1->geom = new GeomPoint( $location1->user_lng,$location1->user_lat);
+            return $location1->save();
+
         } catch (\Exception $e) {
             Log::info('c=OrderApiRepository f=saveData  msg=' . $e->getMessage());
             return false;
         }
-        return $result;
+
 
     }
 
@@ -117,71 +155,6 @@ class OrderApiRepository extends BaseRepository
             order by {$distSql}
             limit {$limit}";
         return $sql;
-
-    }
-
-
-    /**
-     * 拼装插入数据GIS sql语句.
-     *
-     * @param string $filePath
-     * @param array $data 要插入的字段/数据
-     *
-     * @return string  sql
-     */
-
-    protected function getInsertSql($data)
-    {
-        $strfield = '';
-        $strvalue = '';
-        $data['geom']=$data['user_lng'].' '.$data['user_lat'];
-        unset($data['lbs_token']);
-        foreach ($data as $k => $v) {
-            $strfield .= $k.',';
-            if ($k == 'geom') {
-                $strvalue .= "ST_GeomFromText('POINT(" . addslashes($v) . ")',4326),";
-            } else {
-                $strvalue .= "'" . addslashes($v) . "',";
-            }
-        }
-        $strfield = rtrim($strfield, ',');
-        $strvalue = rtrim($strvalue, ',');
-
-        return "insert into orders({$strfield},created_at,updated_at) VALUES ($strvalue,now(),now())";
-
-    }
-
-
-    /**
-     * 拼装修改工单数据GIS sql语句.
-     *
-     * @param string $filePath
-     * @param array $data 要插入的字段/数据
-     * @param array $c_id 修改订单号
-     *
-     * @return string  sql
-     */
-
-    protected function getSaveSql($data, $order_no)
-    {
-        $set = '';
-        unset($data['lbs_token']);
-        if(isset($data['user_lng'])&& isset($data['user_lat'])){
-            $data['geom']=$data['user_lng'].' '.$data['user_lat'];
-        }
-        foreach ($data as $k => $v) {
-            if ($k == 'geom') {
-                $strvalue = "ST_GeomFromText('POINT(".addslashes($v).")',4326)";
-            } else {
-                $strvalue = "'" . addslashes($v) . "'";
-            }
-            $set .= $k . '=' . $strvalue . ',';
-        }
-        $strfield = rtrim($set, ',');
-
-        return "UPDATE orders SET {$strfield},updated_at = now() WHERE order_no = '" . $order_no . "'";
-
-
 
     }
 

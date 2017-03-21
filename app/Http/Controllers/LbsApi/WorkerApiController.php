@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
+
 class WorkerApiController extends Controller
 {
     public $request;
@@ -89,6 +90,7 @@ class WorkerApiController extends Controller
      */
     public function search()
     {
+
         $options = $this->request->all();
         Log::info('c=WorkerApiController f=search  options=' . json_encode($options));
         $worker_lng = isset($options['worker_lng']) ? $options['worker_lng'] : 0;
@@ -121,16 +123,12 @@ class WorkerApiController extends Controller
      * @apiGroup Worker-LBS
      * @apiPermission LBS_TOKEN
      * @apiParam {String}  lbs_token  认证秘钥
-     * @apiParam {BigInt}  uid  关联ID
-     * @apiParam {String} dist 距离(米)
+     * @apiParam {Int}  uid  关联ID
      * @apiParam {String}  full_address  地址
      * @apiParam {String}  name  姓名
      * @apiParam {String}  mobile  电话
      * @apiParam {float}  worker_lat  纬度
      * @apiParam {float}  worker_lng  经度
-     * @apiParam {String}  geom  位置几何
-     * @apiParam {String}  created_at  创建时间
-     * @apiParam {String}  updated_at  修改时间
      * @apiVersion 0.1.0
      * @apiSuccessExample {json} 成功-Response:
      * {
@@ -164,7 +162,7 @@ class WorkerApiController extends Controller
 
         $result = $this->apiRepository->insertData($data);
         if ($result !== false) {
-            return $this->response_json(0, "添加成功", []);
+            return $this->response_json(0, "添加成功", $result);
         } else {
             return $this->response_json(1, "添加失败", [], 422);
         }
@@ -212,7 +210,7 @@ class WorkerApiController extends Controller
         $result = $this->apiRepository->saveData($options, $uid);
 
         if ($result !== false) {
-            return $this->response_json(0, "修改成功", $result);
+            return $this->response_json(0, "修改成功", []);
         } else {
             return $this->response_json(1, "修改失败", [], 422);
         }

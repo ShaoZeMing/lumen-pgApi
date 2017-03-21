@@ -3,7 +3,7 @@ define({ "api": [
     "type": "get",
     "url": "/lbs/sync-worker",
     "title": "同步师傅数据",
-    "description": "<p>同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中</p>",
+    "description": "<p>同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中,注：该接口使用时需要配置。</p>",
     "group": "LBS_Sync",
     "permission": [
       {
@@ -49,7 +49,7 @@ define({ "api": [
   {
     "type": "post",
     "url": "/lbs/insert-order",
-    "title": "添加工单",
+    "title": "添加工单(json)",
     "description": "<p>添加工单(create post)</p>",
     "group": "Order_LBS",
     "permission": [
@@ -127,7 +127,7 @@ define({ "api": [
             "group": "Parameter",
             "type": "String",
             "optional": false,
-            "field": "merchant_telphone",
+            "field": "merchant_tel",
             "description": "<p>厂商联系方式</p>"
           },
           {
@@ -536,17 +536,10 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "BigInt",
+            "type": "Int",
             "optional": false,
             "field": "uid",
             "description": "<p>关联ID</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "dist",
-            "description": "<p>距离(米)</p>"
           },
           {
             "group": "Parameter",
@@ -582,27 +575,6 @@ define({ "api": [
             "optional": false,
             "field": "worker_lng",
             "description": "<p>经度</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "geom",
-            "description": "<p>位置几何</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "created_at",
-            "description": "<p>创建时间</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "updated_at",
-            "description": "<p>修改时间</p>"
           }
         ]
       }

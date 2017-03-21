@@ -19,7 +19,7 @@ class CopydataApiController extends Controller
 
     /**
      * @api {get} /lbs/sync-worker 同步师傅数据
-     * @apiDescription 同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中
+     * @apiDescription 同步师傅数据，将老系统mysql中的师傅数据导入定位系统postSql中,注：该接口使用时需要配置。
      * @apiGroup LBS-Sync
      * @apiPermission LBS_TOKEN
      * @apiParam {String}  lbs_token  认证秘钥

@@ -157,7 +157,7 @@ class OrderApiController extends Controller
 
 
     /**
-     * @api {post} /lbs/insert-order 添加工单
+     * @api {post} /lbs/insert-order 添加工单(json)
      * @apiDescription 添加工单(create post)
      * @apiGroup Order-LBS
      * @apiPermission LBS_TOKEN
@@ -170,7 +170,7 @@ class OrderApiController extends Controller
      * @apiParam {String}  user_mobile  联系人电话
      * @apiParam {int}  merchant_id  厂商id
      * @apiParam {String}  merchant_name  厂商名称
-     * @apiParam {String}  merchant_telphone  厂商联系方式
+     * @apiParam {String}  merchant_tel  厂商联系方式
      * @apiParam {float}  user_lat  纬度
      * @apiParam {float}  user_lng  经度
      * @apiParam {String}  published_at  发布工单时间
@@ -212,7 +212,7 @@ class OrderApiController extends Controller
 
         $result = $this->apiRepository->insertData($data);
         if ($result !== false) {
-            return $this->response_json(0, "添加成功", []);
+            return $this->response_json(0, "添加成功", $result);
         } else {
             return $this->response_json(1, "添加失败", [], 422);
         }
@@ -256,9 +256,7 @@ class OrderApiController extends Controller
         }
         $options = $this->request->all();
         Log::info('c=OrderApiController f=save  options=' . json_encode($options));
-        $order_num = isset($options['order_no']) ? $options['order_no'] : 0;
-
-        $result = $this->apiRepository->saveData($options, $order_num);
+        $result = $this->apiRepository->saveData($options);
 
         if ($result !== false) {
             return $this->response_json(0, "修改成功", []);

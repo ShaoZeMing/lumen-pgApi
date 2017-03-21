@@ -9,7 +9,7 @@ class WorkerValidator extends Validator
     //验证规则
     protected $rules = [
         Validator::RULE_CREATE => [
-            'uid' => 'required|unique:workers,uid',
+            'uid' => 'required',
             'name' => 'required',
             'mobile' => 'required',
             'full_address' => 'required',

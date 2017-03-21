@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Events\Worker;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Phaza\LaravelPostgis\Geometries\GeomPoint;
 
 class WorkerApiRepository extends BaseRepository
 {
@@ -37,11 +38,6 @@ class WorkerApiRepository extends BaseRepository
     {
         $sql = $this->getSearchSql($point, $dist, $status, $limit);
 
-
-//        $point = "point($point)";
-//        $distSql = "ST_DistanceSphere(geom,ST_GeomFromText('$point',4326))";
-
-//       return DB::select('select *, ? dist from workers where ? < ? AND state = ? order by ? limit ? ',[$distSql,$distSql,$dist,$status,$distSql,$limit]);
         try {
             $result = DB::select($sql);
         } catch (\Exception $e) {
@@ -63,16 +59,27 @@ class WorkerApiRepository extends BaseRepository
 
     public function insertData($data)
     {
-        $sql = $this->getInsertSql($data);
 
-        echo $sql;
+
         try {
-            $result = DB::insert($sql);
+            $location1 = new Worker();
+            $location1->name = $data['name'];
+            $location1->uid = $data['uid'];
+            $location1->mobile = $data['mobile'];
+            $location1->worker_lat = $data['worker_lat'];
+            $location1->worker_lng = $data['worker_lng'];
+            $location1->full_address = $data['full_address'];
+            $location1->geom = new GeomPoint($data['worker_lng'], $data['worker_lat']);
+            $location1->save();
         } catch (\Exception $e) {
             Log::info('c=WorkerApiRepository f=insertData  msg=' . $e->getMessage());
             return false;
         }
-        return $result;
+
+        return $location1->getQueueableId();
+
+
+
 
     }
 
@@ -87,15 +94,23 @@ class WorkerApiRepository extends BaseRepository
 
     public function saveData($data, $id)
     {
-        $sql = $this->getSaveSql($data, $id);
-//        echo $sql;
         try {
-            $result = DB::update($sql);
+            $location1 = Worker::where('uid', $data['uid'])->first();;
+            $location1->name = isset($data['name']) ? $data['name'] : $location1->name;
+            $location1->uid = isset($data['uid']) ? $data['uid'] : $location1->uid;
+            $location1->state = isset($data['state']) ? $data['state'] : $location1->state;
+            $location1->mobile = isset($data['mobile']) ? $data['mobile'] : $location1->mobile;
+            $location1->worker_lat = isset($data['worker_lat']) ? $data['worker_lat'] : $location1->worker_lat;
+            $location1->worker_lng = isset($data['worker_lng']) ? $data['worker_lng'] : $location1->worker_lng;
+            $location1->full_address = isset($data['full_address']) ? $data['full_address'] : $location1->full_address;
+            $location1->geom = new GeomPoint( $location1->worker_lng,$location1->worker_lat);
+            return $location1->save();
         } catch (\Exception $e) {
             Log::info('c=WorkerApiRepository f=saveData  msg=' . $e->getMessage());
             return false;
         }
-        return $result;
+
+
 
     }
 
@@ -112,7 +127,6 @@ class WorkerApiRepository extends BaseRepository
     protected function getSearchSql($point, $dist, $status, $limit)
     {
 
-
         $point = "point($point)";
         $distSql = "ST_DistanceSphere(geom,ST_GeomFromText('$point',4326))";
 
@@ -126,70 +140,6 @@ class WorkerApiRepository extends BaseRepository
             limit {$limit}";
 
         return $sql;
-
-    }
-
-
-    /**
-     * 拼装插入数据GIS sql语句.
-     *
-     * @param string $filePath
-     * @param array $data 要插入的字段/数据
-     *
-     * @return string  sql
-     */
-
-    protected function getInsertSql($data)
-    {
-        $strfield = '';
-        $strvalue = '';
-        unset($data['lbs_token']);
-        $data['geom']=$data['worker_lng'].' '.$data['worker_lat'];
-        foreach ($data as $k => $v) {
-            $strfield .= $k . ',';
-            if ($k == 'geom') {
-                $strvalue .= "ST_GeomFromText('POINT(" . addslashes($v) . ")',4326),";
-            } else {
-                $strvalue .= "'" . addslashes($v) . "',";
-            }
-        }
-        $strfield = rtrim($strfield, ',');
-        $strvalue = rtrim($strvalue, ',');
-
-        return "insert into workers({$strfield},created_at,updated_at) VALUES ($strvalue,now(),now())";
-
-    }
-
-
-    /**
-     * 拼装修改师傅数据GIS sql语句.
-     *
-     * @param string $filePath
-     * @param array $data 要插入的字段/数据
-     * @param array $uid 修改关联uid键
-     *
-     * @return string  sql
-     */
-
-    protected function getSaveSql($data, $uid)
-    {
-        $set = '';
-        if(isset($data['worker_lng'])&& isset($data['worker_lat'])){
-            $data['geom']=$data['worker_lng'].' '.$data['worker_lat'];
-        }
-        unset($data['lbs_token']);
-        foreach ($data as $k => $v) {
-            if ($k == 'geom') {
-                $strvalue = "ST_GeomFromText('POINT({$v})',4326)";
-            } else {
-                $strvalue = "'" . addslashes($v) . "'";
-            }
-            $set .= $k . '=' . $strvalue . ',';
-
-        }
-        $strfield = rtrim($set, ',');
-
-        return "UPDATE workers SET {$strfield},updated_at = now() WHERE uid = '" . $uid . "'";
 
     }
 
